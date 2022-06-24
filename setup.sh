@@ -73,32 +73,34 @@ function setup_email() {
   read -r -p "Enter the SMTP Port (587): " smtpPort
   read -r -p "Enter the email to send notifications to: " notifyEmail
   
-  cat <<- EOF > /etc/msmtprc
-  defaults
-  auth on
-  tls on
-  tls_trust_file /etc/ssl/certs/ca-certificates.crt
+  rm ./etc/msmtprc
+  {
+    echo "defaults"
+    echo "auth on"
+    echo "tls on"
+    echo "tls_trust_file /etc/ssl/certs/ca-certificates.crt"
+    echo ""
+    echo "account default" 
+    echo "host $smtpServer"
+    echo "port $smtpPort"
+    echo "user $smtpUser"
+    echo "password $smtpPassword"
+    echo "from $smtpUser"
+    echo ""
+    echo "aliases /etc/aliases"
+    echo ""
+  }  >> ./etc/msmtprc
+  install -m 644 -o root -g root ./etc/msmtprc /etc
+  rm ./etc/msmtprc
 
-  account default 
-  host $smtpServer
-  port $smtpPort
-  user $smtpUser
-  password $smtpPassword
-  from $smtpUser
-
-  aliases /etc/aliases
-
-EOF
-  chown root:root /etc/msmtprc
-  chmod 644 /etc/msmtprc
-
-  cat <<- EOF > /etc/aliases
-  root: $notifyEmail
-  default: $notifyEmail
-
-EOF
-  chown root:root /etc/aliases
-  chmod 644 /etc/aliases
+  rm ./etc/aliases
+  {
+    echo "root: $notifyEmail"
+    echo "default: $notifyEmail"
+    echo ""
+  } >> ./etc/aliases
+  install -m 644 -o root -g root ./etc/aliases /etc
+  rm ./etc/aliases
 
   echo "Sending test email..."
   echo "mail works!" | mail root
@@ -162,14 +164,15 @@ function setup_nut() {
   
   upsert_config "/etc/nut/nut.conf" "MODE=" "standalone"
   
-  cat <<- EOF > /etc/nut/upsd.users
-  [upsmon]
-    password  = $upspassword
-    upsmon master
-
-EOF
-  chown root:nut /etc/nut/upsd.users
-  chmod 460 /etc/nut/upsd.users
+  rm ./etc/nut/upsd.users
+  {
+    echo "[upsmon]"
+    echo "    password  = $upspassword"
+    echo "    upsmon master"
+    
+  } >> ./etc/nut/upsd.users
+  install -m 460 -o root -g nut ./etc/nut/upsd.users /etc/nut
+  rm ./etc/nut/upsd.users
   
   install -m 460 -o root -g nut ./etc/nut/ups.conf /etc/nut
 
