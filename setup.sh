@@ -42,11 +42,7 @@ function setup_media_user() {
 
 function setup_samba() {
   apt-get -qq -y install samba
-  
-  cp ./etc/samba/smb.conf /etc/samba/smb.conf
-  chown root:root /etc/samba/smb.conf
-  chmod 644 /etc/samba/smb.conf
-  
+  install -m 644 -o root -g root ./etc/samba/smb.conf /etc/samba
   echo "SMB password is used for accessing the network shares."
   smbpasswd -a media
   service smbd restart
@@ -128,6 +124,10 @@ function setup_zfs() {
   upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_NOTIFY_VERBOSE=" "1"
   upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_EMAIL_ADDR=" "root"
   zpool import vault
+  install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.service /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.timer /etc/systemd/system
+  systemctl daemon-reload
+  systemctl enable --now zpool-scrub@vault.timer
   echo "Finished ZFS Setup"
 }
 
@@ -136,12 +136,6 @@ function setup_hdd_monitoring() {
   apt-get -qq -y install smartmontools
   upsert_config "/etc/smartd.conf" "DEVICESCAN" " -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,38,45 -m root"
   echo "Finished HDD Monitoring Setup"
-}
-
-function setup_cron() {
-  echo "Starting cron Setup"
-  crontab ./mycron
-  echo "Finished cron Setup"
 }
 
 function setup_docker() {
@@ -177,9 +171,7 @@ EOF
   chown root:nut /etc/nut/upsd.users
   chmod 460 /etc/nut/upsd.users
   
-  cp ./etc/nut/ups.conf /etc/nut/ups.conf
-  chown root:nut /etc/nut/ups.conf
-  chmod 460 /etc/nut/ups.conf
+  install -m 460 -o root -g nut ./etc/nut/ups.conf /etc/nut
 
   upsert_config "/etc/nut/upsd.conf" "MAXAGE" " 25"
   
@@ -198,13 +190,8 @@ EOF
   upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG NOCOMM" "       SYSLOG+EXEC"
   upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG NOPARENT" "     SYSLOG+EXEC"
 
-  cp ./usr/bin/upssched-cmd /usr/bin/upssched-cmd
-  chown root:root /usr/bin/upssched-cm
-  chmod 755 /usr/bin/upssched-cm
-
-  cp ./etc/nut/upssched.conf /etc/nut/upssched.conf
-  chown root:nut /etc/nut/ups.conf
-  chmod 460 /etc/nut/ups.conf
+  install -m 755 -o root -g root ./usr/bin/upssched-cmd /usr/bin
+  install -m 460 -o root -g nut ./etc/nut/upssched.conf /etc/nut
   
   service nut-service start
   service nut-monitor start
@@ -230,7 +217,6 @@ do
       setup_cloud-init
       setup_zfs
       setup_hdd_monitoring
-      setup_cron
       setup_docker
       setup_portainer
       setup_nut
