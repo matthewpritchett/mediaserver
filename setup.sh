@@ -200,7 +200,7 @@ function setup_nut() {
   install -m 755 -o root -g root ./usr/bin/upssched-cmd /usr/bin
   install -m 460 -o root -g nut ./etc/nut/upssched.conf /etc/nut
   
-  service nut-service start
+  service nut-server start
   service nut-monitor start
 }
 
@@ -227,15 +227,15 @@ do
       echo "Automatic Setup"
       apt-get update
       setup_networking
+      setup_cloud-init
+      setup_fail2ban
       setup_email
       setup_ssh
-      setup_cockpit
       setup_media_user
       setup_samba
-      setup_fail2ban
-      setup_cloud-init
-      setup_zfs
       setup_hdd_monitoring
+      setup_zfs
+      setup_cockpit
       setup_docker
       setup_portainer
       setup_nut
