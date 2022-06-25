@@ -72,6 +72,7 @@ function setup_email() {
   
   read -r -p "Enter the SMTP Username (your_email@gamil.com): " smtpUser
   read -r -p "Enter the SMTP Password: " -s smtpPassword
+  echo ""
   read -r -p "Enter the SMTP Server (smtp.gmail.com): " smtpServer
   read -r -p "Enter the SMTP Port (587): " smtpPort
   read -r -p "Enter the email to send notifications to: " notifyEmail
