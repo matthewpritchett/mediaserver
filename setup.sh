@@ -35,7 +35,7 @@ function setup_media_user() {
     echo "Beginning media User Setup"
     groupadd --gid 8675309 media
     adduser --gecos "" --no-create-home --disabled-password --disabled-login --uid 8675309 --gid 8675309 media
-    usermod -aG media pritchett
+    usermod -aG media $real_user
     echo "Finished media User Setup"
   fi
 }
@@ -199,6 +199,17 @@ function setup_nut() {
   service nut-service start
   service nut-monitor start
 }
+
+if ! [ $(id -u) = 0 ]; then
+   echo "The script need to be run as root." >&2
+   exit 1
+fi
+
+if [ $SUDO_USER ]; then
+    real_user=$SUDO_USER
+else
+    real_user=$(whoami)
+fi
 
 echo "Media Server Setup"
 echo "=================="
