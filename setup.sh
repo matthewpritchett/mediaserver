@@ -225,9 +225,9 @@ do
     "Automated Setup")
       echo "Automatic Setup"
       apt-get update
+      setup_networking
       setup_email
       setup_ssh
-      setup_networking
       setup_cockpit
       setup_media_user
       setup_samba
