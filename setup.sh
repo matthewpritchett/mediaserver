@@ -68,7 +68,7 @@ function setup_email() {
   apt-get -qq -y install bsd-mailx msmtp msmtp-mta
   
   read -r -p "Enter the SMTP Username (your_email@gamil.com): " smtpUser
-  read -r -p -s "Enter the SMTP Password: " smtpPassword
+  read -r -p "Enter the SMTP Password: " -s smtpPassword
   read -r -p "Enter the SMTP Server (smtp.gmail.com): " smtpServer
   read -r -p "Enter the SMTP Port (587): " smtpPort
   read -r -p "Enter the email to send notifications to: " notifyEmail
