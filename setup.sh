@@ -49,9 +49,12 @@ function setup_samba() {
 }
 
 function setup_networking() {
-  upsert_config "/etc/netplan/00-installer-config.yaml" "  renderer:" " NetworkManager"
+  apt-get -qq -y install network-manager
+  systemctl enable NetworkManager.service
+  install -m 644 -o root -g root ./etc/netplan/00-installer-config.yaml /etc/netplan
   netplan generate
   netplan apply
+  systemctl restart NetworkManager.service
 }
 
 function  setup_cockpit() {
@@ -221,6 +224,7 @@ do
   case $opt in
     "Automated Setup")
       echo "Automatic Setup"
+      apt-get update
       setup_email
       setup_ssh
       setup_networking
