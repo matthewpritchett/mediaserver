@@ -61,7 +61,7 @@ function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
   curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
   sudo bash setup-repo.sh
-  apt-get -qq -y install cockpit cockpit-benchmark cockpit-zfs-manager cockpit-navigator cockpit-file-sharing cockpit-machines
+  apt-get -qq -y install cockpit cockpit-zfs-manager cockpit-navigator cockpit-file-sharing cockpit-machines
   systemctl start cockpit
   echo "Finished Cockpit Setup"
 }
