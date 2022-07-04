@@ -12,18 +12,18 @@ function delete_config() {
 function upsert_config() {
   local filename=$1
   local key=$2
-  local value=$3
+  local separator=$3
+  local value=$4
   
-  sed --in-place "/^$key/d" "$filename"
-  sed -i -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$filename"
-  echo "$key$value" >> "$filename"
+  delete_config $filename $key
+  echo "$key$separator$value" >> "$filename"
   echo "" >> "$filename"
 }
 
 function setup_ssh() {
   echo "Beginning SSH Setup"
-  upsert_config "/etc/ssh/sshd_config" "PermitRootLogin" " no"
-  upsert_config "/etc/ssh/sshd_config" "PasswordAuthentication" " no"
+  upsert_config "/etc/ssh/sshd_config" "PermitRootLogin" " " "no"
+  upsert_config "/etc/ssh/sshd_config" "PasswordAuthentication" " " "no"
   systemctl reload sshd
   echo "Finished SSH Setup"
 }
@@ -127,8 +127,8 @@ function setup_cloud-init() {
 function setup_zfs() {
   echo "Starting ZFS Setup"
   apt-get -qq -y install zfsutils-linux
-  upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_NOTIFY_VERBOSE=" "1"
-  upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_EMAIL_ADDR=" "root"
+  upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_NOTIFY_VERBOSE" "=" "1"
+  upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_EMAIL_ADDR" "=" "root"
   zpool import vault
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.timer /etc/systemd/system
@@ -140,7 +140,7 @@ function setup_zfs() {
 function setup_hdd_monitoring() {
   echo "Starting HDD Monitoring Setup"
   apt-get -qq -y install smartmontools
-  upsert_config "/etc/smartd.conf" "DEVICESCAN" " -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,38,45 -m root"
+  upsert_config "/etc/smartd.conf" "DEVICESCAN" " " "-a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,38,45 -m root"
   echo "Finished HDD Monitoring Setup"
 }
 
@@ -153,55 +153,11 @@ function setup_docker() {
 function setup_portainer() {
   docker stop portainer
   docker rm portainer
-  docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
+  docker run -d -p 9443:9443 --name portainer \
     --restart=always \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v portainer_data:/data \
-    portainer/portainer-ce:2.9.3
-}
-
-function setup_nut() {
-  apt-get -qq -y install nut
-  
-  local upspassword
-  upspassword=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 10)
-  
-  upsert_config "/etc/nut/nut.conf" "MODE=" "standalone"
-  
-  rm ./etc/nut/upsd.users
-  {
-    echo "[upsmon]"
-    echo "    password  = $upspassword"
-    echo "    upsmon master"
-    
-  } >> ./etc/nut/upsd.users
-  install -m 460 -o root -g nut ./etc/nut/upsd.users /etc/nut
-  rm ./etc/nut/upsd.users
-  
-  install -m 460 -o root -g nut ./etc/nut/ups.conf /etc/nut
-
-  upsert_config "/etc/nut/upsd.conf" "MAXAGE" " 25"
-  
-  upsert_config "/etc/nut/upsmon.conf" "MONITOR" " cyberp@localhost 1 upsmon $upspassword master"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYCMD" " /usr/sbin/upssched"
-  upsert_config "/etc/nut/upsmon.conf" "DEADTIME" " 25"
-  delete_config "/etc/nut/upsmon.conf" "POWERDOWNFLAG"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG ONLINE" "       SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG ONBATT" "       SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG LOWBATT" "      SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG FSD" "          SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG COMMOK" "       SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG COMMBAD" "      SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG SHUTDOWN" "     SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG REPLBATT" "     SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG NOCOMM" "       SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG NOPARENT" "     SYSLOG+EXEC"
-
-  install -m 755 -o root -g root ./usr/bin/upssched-cmd /usr/bin
-  install -m 460 -o root -g nut ./etc/nut/upssched.conf /etc/nut
-  
-  service nut-server start
-  service nut-monitor start
+    portainer/portainer-ce:latest
 }
 
 if ! [ $(id -u) = 0 ]; then
@@ -238,7 +194,6 @@ do
       setup_cockpit
       setup_docker
       setup_portainer
-      setup_nut
       break
       ;;
     "Setup Email")
