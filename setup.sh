@@ -53,18 +53,19 @@ function setup_networking() {
   apt-get -qq -y install network-manager
 
   # disable networkd
-  systemctl disable systemd-networkd.service
-  systemctl mask systemd-networkd.service
-  systemctl stop systemd-networkd.service
-
-  # setup network config
-  install -m 644 -o root -g root ./etc/netplan/00-installer-config.yaml /etc/netplan
-  netplan generate
+  systemctl stop systemd-networkd
+  systemctl disable systemd-networkd
+  systemctl mask systemd-networkd
 
   # enable network manager
   systemctl unmask NetworkManager
   systemctl enable NetworkManager
   systemctl start NetworkManager
+
+  # setup network config
+  install -m 644 -o root -g root ./etc/netplan/00-installer-config.yaml /etc/netplan
+  netplan generate
+  netplan apply
 }
 
 function  setup_cockpit() {
