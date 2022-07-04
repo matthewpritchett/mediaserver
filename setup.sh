@@ -49,13 +49,15 @@ function setup_samba() {
 }
 
 function setup_networking() {
+  #install network manager
+  apt-get -qq -y install network-manager
+
   # disable networkd
   systemctl disable systemd-networkd.service
   systemctl mask systemd-networkd.service
   systemctl stop systemd-networkd.service
 
   # setup network config
-  apt-get -qq -y install network-manager
   install -m 644 -o root -g root ./etc/netplan/00-installer-config.yaml /etc/netplan
   netplan generate
 
