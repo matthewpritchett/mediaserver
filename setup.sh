@@ -191,9 +191,9 @@ do
       setup_samba
       setup_hdd_monitoring
       setup_zfs
-      setup_cockpit
       setup_docker
       setup_portainer
+      setup_cockpit
       break
       ;;
     "Setup Email")
