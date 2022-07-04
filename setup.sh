@@ -73,6 +73,8 @@ function  setup_cockpit() {
   curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
   sudo bash setup-repo.sh
   apt-get -qq -y install cockpit cockpit-zfs-manager cockpit-navigator cockpit-file-sharing cockpit-machines
+  systemctl unmask cockpit
+  systemctl enable cockpit
   systemctl start cockpit
   echo "Finished Cockpit Setup"
 }
