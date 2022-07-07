@@ -41,7 +41,7 @@ function setup_media_user() {
 }
 
 function setup_samba() {
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install samba
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install samba
   install -m 644 -o root -g root ./etc/samba/smb.conf /etc/samba
   echo "SMB password is used for accessing the network shares."
   smbpasswd -a media
@@ -50,7 +50,7 @@ function setup_samba() {
 
 function setup_networking() {
   #install network manager
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install network-manager
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install network-manager
 
   # disable networkd
   systemctl stop systemd-networkd
@@ -72,7 +72,7 @@ function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
   curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
   sudo bash setup-repo.sh
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install cockpit cockpit-zfs-manager cockpit-navigator cockpit-file-sharing cockpit-machines
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install cockpit cockpit-zfs-manager cockpit-navigator cockpit-file-sharing cockpit-machines
   systemctl unmask cockpit
   systemctl enable cockpit
   systemctl start cockpit
@@ -81,7 +81,7 @@ function  setup_cockpit() {
 
 function setup_email() {
   echo "Beginning Email Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install bsd-mailx msmtp msmtp-mta
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install bsd-mailx msmtp msmtp-mta
   
   read -r -p "Enter the SMTP Username (your_email@gamil.com): " smtpUser
   read -r -p "Enter the SMTP Password: " -s smtpPassword
@@ -127,7 +127,7 @@ function setup_email() {
 
 function setup_fail2ban() {
   echo "Starting Fail2Ban Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install fail2ban
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install fail2ban
   echo "Finished Fail2Ban Setup"
 }
 
@@ -139,7 +139,7 @@ function setup_cloud-init() {
 
 function setup_zfs() {
   echo "Starting ZFS Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install zfsutils-linux
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install zfsutils-linux
   upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_NOTIFY_VERBOSE" "=" "1"
   upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_EMAIL_ADDR" "=" "root"
   zpool import vault
@@ -154,14 +154,14 @@ function setup_zfs() {
 
 function setup_hdd_monitoring() {
   echo "Starting HDD Monitoring Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install smartmontools
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install smartmontools
   upsert_config "/etc/smartd.conf" "DEVICESCAN" " " "-a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,38,45 -m root"
   echo "Finished HDD Monitoring Setup"
 }
 
 function setup_docker() {
   echo "Starting Docker Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yq install docker.io
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install docker.io
   docker network create reverse_proxy
   docker network create softwarr
   echo "Finished Docker Setup"
