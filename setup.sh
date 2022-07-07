@@ -15,7 +15,7 @@ function upsert_config() {
   local separator=$3
   local value=$4
   
-  delete_config $filename $key
+  delete_config "$filename" "$key"
   echo "$key$separator$value" >> "$filename"
   echo "" >> "$filename"
 }
@@ -35,13 +35,13 @@ function setup_media_user() {
     echo "Beginning media User Setup"
     groupadd --gid 8675309 media
     adduser --gecos "" --no-create-home --disabled-password --disabled-login --uid 8675309 --gid 8675309 media
-    usermod -aG media $real_user
+    usermod -aG media "$real_user"
     echo "Finished media User Setup"
   fi
 }
 
 function setup_samba() {
-  apt-get -qq -y install samba
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install samba
   install -m 644 -o root -g root ./etc/samba/smb.conf /etc/samba
   echo "SMB password is used for accessing the network shares."
   smbpasswd -a media
@@ -50,7 +50,7 @@ function setup_samba() {
 
 function setup_networking() {
   #install network manager
-  apt-get -qq -y install network-manager
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install network-manager
 
   # disable networkd
   systemctl stop systemd-networkd
@@ -72,7 +72,7 @@ function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
   curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
   sudo bash setup-repo.sh
-  apt-get -qq -y install cockpit cockpit-zfs-manager cockpit-navigator cockpit-file-sharing cockpit-machines
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install cockpit cockpit-zfs-manager cockpit-navigator cockpit-file-sharing cockpit-machines
   systemctl unmask cockpit
   systemctl enable cockpit
   systemctl start cockpit
@@ -81,7 +81,7 @@ function  setup_cockpit() {
 
 function setup_email() {
   echo "Beginning Email Setup"
-  apt-get -qq -y install bsd-mailx msmtp msmtp-mta
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install bsd-mailx msmtp msmtp-mta
   
   read -r -p "Enter the SMTP Username (your_email@gamil.com): " smtpUser
   read -r -p "Enter the SMTP Password: " -s smtpPassword
@@ -127,7 +127,7 @@ function setup_email() {
 
 function setup_fail2ban() {
   echo "Starting Fail2Ban Setup"
-  apt-get -qq -y install fail2ban
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install fail2ban
   echo "Finished Fail2Ban Setup"
 }
 
@@ -139,27 +139,31 @@ function setup_cloud-init() {
 
 function setup_zfs() {
   echo "Starting ZFS Setup"
-  apt-get -qq -y install zfsutils-linux
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install zfsutils-linux
   upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_NOTIFY_VERBOSE" "=" "1"
   upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_EMAIL_ADDR" "=" "root"
   zpool import vault
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.timer /etc/systemd/system
+  isntall -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.server /etc/systemd/system
   systemctl daemon-reload
   systemctl enable --now zpool-scrub@vault.timer
+  systemctl enable --now docker-wait-zfs.service
   echo "Finished ZFS Setup"
 }
 
 function setup_hdd_monitoring() {
   echo "Starting HDD Monitoring Setup"
-  apt-get -qq -y install smartmontools
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install smartmontools
   upsert_config "/etc/smartd.conf" "DEVICESCAN" " " "-a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,38,45 -m root"
   echo "Finished HDD Monitoring Setup"
 }
 
 function setup_docker() {
   echo "Starting Docker Setup"
-  apt-get -qq -y install docker.io
+  DEBIAN_FRONTEND=noninteractive apt-get -yq install docker.io
+  docker network create reverse_proxy
+  docker network create softwarr
   echo "Finished Docker Setup"
 }
 
@@ -176,12 +180,12 @@ function setup_portainer() {
     portainer/portainer-ce:latest
 }
 
-if ! [ $(id -u) = 0 ]; then
+if ! [ "$(id -u)" = 0 ]; then
    echo "The script need to be run as root." >&2
    exit 1
 fi
 
-if [ $SUDO_USER ]; then
+if [ "$SUDO_USER" ]; then
     real_user=$SUDO_USER
 else
     real_user=$(whoami)
@@ -196,7 +200,7 @@ select opt in "${options[@]}"
 do
   case $opt in
     "Automated Setup")
-      echo "Automatic Setup"
+      echo "Automated Setup"
       apt-get update
       setup_networking
       setup_cloud-init
@@ -210,6 +214,7 @@ do
       setup_docker
       setup_portainer
       setup_cockpit
+      echo "Finished Automated Setup"
       break
       ;;
     "Setup Email")
