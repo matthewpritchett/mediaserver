@@ -145,7 +145,7 @@ function setup_zfs() {
   zpool import vault
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.timer /etc/systemd/system
-  isntall -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.server /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.service /etc/systemd/system
   systemctl daemon-reload
   systemctl enable --now zpool-scrub@vault.timer
   systemctl enable --now docker-wait-zfs.service
