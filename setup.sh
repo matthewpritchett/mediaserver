@@ -161,23 +161,15 @@ function setup_hdd_monitoring() {
 
 function setup_docker() {
   echo "Starting Docker Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install docker.io
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install docker.io docker-compose
+  install -m 644 -o root -g root ./etc/docker/daemon.json /etc/docker
   docker network create reverse_proxy
   docker network create softwarr
   echo "Finished Docker Setup"
 }
 
 function setup_portainer() {
-  docker stop portainer
-  docker rm portainer
-  docker run -d \
-    -p 8000:8000 \
-    -p 9443:9443 \
-    --name portainer \
-    --restart=always \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v portainer_data:/data \
-    portainer/portainer-ce:latest
+  docker compose --file /vault/containers/portainer/compose.yaml up --detach
 }
 
 if ! [ "$(id -u)" = 0 ]; then
@@ -215,6 +207,8 @@ do
       setup_portainer
       setup_cockpit
       echo "Finished Automated Setup"
+      read -n 1 -s -r -p "Press any key to reboot"
+      reboot
       break
       ;;
     "Setup Email")
