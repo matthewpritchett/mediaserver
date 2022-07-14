@@ -1,3 +1,3 @@
-# media_server_scripts
+# mediaserver
 
 Scripts and config files for setting up my media server
