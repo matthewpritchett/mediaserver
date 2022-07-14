@@ -3,7 +3,7 @@
 function delete_config() {
   local filename=$1
   local key=$2
-  
+
   sed --in-place "/^$key/d" "$filename"
   sed -i -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$filename"
   echo "" >> "$filename"
@@ -14,7 +14,7 @@ function upsert_config() {
   local key=$2
   local separator=$3
   local value=$4
-  
+
   delete_config "$filename" "$key"
   echo "$key$separator$value" >> "$filename"
   echo "" >> "$filename"
@@ -82,14 +82,14 @@ function  setup_cockpit() {
 function setup_email() {
   echo "Beginning Email Setup"
   DEBIAN_FRONTEND=noninteractive apt-get -yqq install bsd-mailx msmtp msmtp-mta
-  
+
   read -r -p "Enter the SMTP Username (your_email@gamil.com): " smtpUser
   read -r -p "Enter the SMTP Password: " -s smtpPassword
   echo ""
   read -r -p "Enter the SMTP Server (smtp.gmail.com): " smtpServer
   read -r -p "Enter the SMTP Port (587): " smtpPort
   read -r -p "Enter the email to send notifications to: " notifyEmail
-  
+
   rm ./etc/msmtprc
   {
     echo "defaults"
@@ -97,7 +97,7 @@ function setup_email() {
     echo "tls on"
     echo "tls_trust_file /etc/ssl/certs/ca-certificates.crt"
     echo ""
-    echo "account default" 
+    echo "account default"
     echo "host $smtpServer"
     echo "port $smtpPort"
     echo "user $smtpUser"
@@ -163,8 +163,6 @@ function setup_docker() {
   echo "Starting Docker Setup"
   DEBIAN_FRONTEND=noninteractive apt-get -yqq install docker.io docker-compose
   install -m 644 -o root -g root ./etc/docker/daemon.json /etc/docker
-  docker network create reverse_proxy
-  docker network create softwarr
   echo "Finished Docker Setup"
 }
 
@@ -222,7 +220,7 @@ do
     "Quit")
       break
       ;;
-    *) 
+    *)
       echo "Invalid option $REPLY"
       ;;
   esac
