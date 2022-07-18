@@ -162,12 +162,55 @@ function setup_hdd_monitoring() {
 function setup_docker() {
   echo "Starting Docker Setup"
   DEBIAN_FRONTEND=noninteractive apt-get -yqq install docker.io docker-compose
-  install -m 644 -o root -g root ./etc/docker/daemon.json /etc/docker
   echo "Finished Docker Setup"
 }
 
 function setup_portainer() {
-  docker compose --file /vault/containers/portainer/compose.yaml up --detach
+  docker-compose --file /vault/containers/portainer/compose.yaml up --detach
+}
+
+function setup_nut() {
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq  install nut
+
+  local upspassword
+  upspassword=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 10)
+
+  upsert_config "/etc/nut/nut.conf" "MODE=" "standalone"
+
+  rm ./etc/nut/upsd.users
+  {
+    echo "[upsmon]"
+    echo "    password  = $upspassword"
+    echo "    upsmon master"
+
+  } >> ./etc/nut/upsd.users
+  install -m 460 -o root -g nut ./etc/nut/upsd.users /etc/nut
+  rm ./etc/nut/upsd.users
+
+  install -m 460 -o root -g nut ./etc/nut/ups.conf /etc/nut
+
+  upsert_config "/etc/nut/upsd.conf" "MAXAGE" " 25"
+
+  upsert_config "/etc/nut/upsmon.conf" "MONITOR" " cyberp@localhost 1 upsmon $upspassword master"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYCMD" " /usr/sbin/upssched"
+  upsert_config "/etc/nut/upsmon.conf" "DEADTIME" " 25"
+  delete_config "/etc/nut/upsmon.conf" "POWERDOWNFLAG"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG ONLINE" "       SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG ONBATT" "       SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG LOWBATT" "      SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG FSD" "          SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG COMMOK" "       SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG COMMBAD" "      SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG SHUTDOWN" "     SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG REPLBATT" "     SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG NOCOMM" "       SYSLOG+EXEC"
+  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG NOPARENT" "     SYSLOG+EXEC"
+
+  install -m 755 -o root -g root ./usr/bin/upssched-cmd /usr/bin
+  install -m 460 -o root -g nut ./etc/nut/upssched.conf /etc/nut
+
+  service nut-server start
+  service nut-monitor start
 }
 
 if ! [ "$(id -u)" = 0 ]; then
@@ -185,11 +228,11 @@ echo "Media Server Setup"
 echo "=================="
 
 PS3="Select the operation: "
-options=("Automated Setup" "Setup Email" "Update Portainer" "Quit")
+options=("Setup Media Server" "Setup Email" "Update Portainer" "Quit")
 select opt in "${options[@]}"
 do
   case $opt in
-    "Automated Setup")
+    "Setup Media Server")
       echo "Automated Setup"
       apt-get update
       setup_networking
