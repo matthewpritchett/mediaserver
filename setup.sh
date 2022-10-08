@@ -20,6 +20,14 @@ function upsert_config() {
   echo "" >> "$filename"
 }
 
+function replace_text() {
+  local filename=$1
+  local old=$2
+  local new=$3
+
+  sed --in-place "s|$old|$new|g" "$filename"
+}
+
 function setup_ssh() {
   echo "Beginning SSH Setup"
   upsert_config "/etc/ssh/sshd_config" "PermitRootLogin" " " "no"
@@ -90,34 +98,14 @@ function setup_email() {
   read -r -p "Enter the SMTP Port (587): " smtpPort
   read -r -p "Enter the email to send notifications to: " notifyEmail
 
-  rm ./etc/msmtprc
-  {
-    echo "defaults"
-    echo "auth on"
-    echo "tls on"
-    echo "tls_trust_file /etc/ssl/certs/ca-certificates.crt"
-    echo ""
-    echo "account default"
-    echo "host $smtpServer"
-    echo "port $smtpPort"
-    echo "user $smtpUser"
-    echo "password $smtpPassword"
-    echo "from $smtpUser"
-    echo ""
-    echo "aliases /etc/aliases"
-    echo ""
-  }  >> ./etc/msmtprc
   install -m 644 -o root -g root ./etc/msmtprc /etc
-  rm ./etc/msmtprc
+  replace_text "/etc/msmtprc" "SMTPSERVER" "$smtpServer"
+  replace_text "/etc/msmtprc" "SMTPPORT" "$smtpPort"
+  replace_text "/etc/msmtprc" "SMTPUSER" "$smtpUser"
+  replace_text "/etc/msmtprc" "SMTPPASSWORD" "$smtpPassword"
 
-  rm ./etc/aliases
-  {
-    echo "root: $notifyEmail"
-    echo "default: $notifyEmail"
-    echo ""
-  } >> ./etc/aliases
   install -m 644 -o root -g root ./etc/aliases /etc
-  rm ./etc/aliases
+  replace_text "/etc/aliases" "NOTIFYEMAIL" "$notifyEmail"
 
   echo "Sending test email..."
   echo "mail works!" | mail root
@@ -167,7 +155,6 @@ function setup_docker() {
 
 function setup_portainer() {
   docker run -d -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
-  docker-compose --file /vault/containers/portainer/compose.yaml up --detach
 }
 
 function setup_nut() {
@@ -178,19 +165,10 @@ function setup_nut() {
 
   upsert_config "/etc/nut/nut.conf" "MODE=" "standalone"
 
-  rm ./etc/nut/upsd.users
-  {
-    echo "[upsmon]"
-    echo "    password  = $upspassword"
-    echo "    upsmon master"
-
-  } >> ./etc/nut/upsd.users
   install -m 460 -o root -g nut ./etc/nut/upsd.users /etc/nut
-  rm ./etc/nut/upsd.users
+  replace_text "/etc/nut/upsd.users" "UPSPASSWORD" $upspassword
 
   install -m 460 -o root -g nut ./etc/nut/ups.conf /etc/nut
-
-  upsert_config "/etc/nut/upsd.conf" "MAXAGE" " 25"
 
   upsert_config "/etc/nut/upsmon.conf" "MONITOR" " cyberp@localhost 1 upsmon $upspassword master"
   upsert_config "/etc/nut/upsmon.conf" "NOTIFYCMD" " /usr/sbin/upssched"
