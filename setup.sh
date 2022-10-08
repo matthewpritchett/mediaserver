@@ -41,7 +41,7 @@ function setup_media_user() {
 }
 
 function setup_samba() {
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install samba
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install samba cockpit-file-sharing
   install -m 644 -o root -g root ./etc/samba/smb.conf /etc/samba
   echo "SMB password is used for accessing the network shares."
   smbpasswd -a media
@@ -72,7 +72,7 @@ function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
   curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
   sudo bash setup-repo.sh
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install cockpit cockpit-zfs-manager cockpit-navigator cockpit-file-sharing cockpit-machines
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install cockpit cockpit-navigator cockpit-machines
   systemctl unmask cockpit
   systemctl enable cockpit
   systemctl start cockpit
@@ -139,7 +139,7 @@ function setup_cloud-init() {
 
 function setup_zfs() {
   echo "Starting ZFS Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install zfsutils-linux
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install zfsutils-linux cockpit-zfs-manager
   upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_NOTIFY_VERBOSE" "=" "1"
   upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_EMAIL_ADDR" "=" "root"
   zpool import vault
@@ -166,6 +166,7 @@ function setup_docker() {
 }
 
 function setup_portainer() {
+  docker run -d -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
   docker-compose --file /vault/containers/portainer/compose.yaml up --detach
 }
 
@@ -213,6 +214,18 @@ function setup_nut() {
   service nut-monitor start
 }
 
+function setup_base() {
+  apt-get update
+  setup_networking
+  setup_cloud-init
+  setup_fail2ban
+  setup_email
+  setup_ssh
+  setup_media_user
+  setup_hdd_monitoring
+  setup_cockpit
+}
+
 if ! [ "$(id -u)" = 0 ]; then
    echo "The script need to be run as root." >&2
    exit 1
@@ -224,39 +237,37 @@ else
     real_user=$(whoami)
 fi
 
-echo "Media Server Setup"
+echo "Server Scripts"
 echo "=================="
 
 PS3="Select the operation: "
-options=("Setup Media Server" "Setup Email" "Update Portainer" "Quit")
+options=("Media Server Setup" "App Server Setup" "Email Setup" "Portainer Setup" "Quit")
 select opt in "${options[@]}"
 do
   case $opt in
-    "Setup Media Server")
-      echo "Automated Setup"
-      apt-get update
-      setup_networking
-      setup_cloud-init
-      setup_fail2ban
-      setup_email
-      setup_ssh
-      setup_media_user
+    "Media Server Setup")
+      echo "Beginning Media Server Setup"
+      setup_base
       setup_samba
-      setup_hdd_monitoring
       setup_zfs
-      setup_docker
-      setup_portainer
-      setup_cockpit
-      echo "Finished Automated Setup"
+      echo "Finished Media Server Setup"
       read -n 1 -s -r -p "Press any key to reboot"
       reboot
       break
       ;;
-    "Setup Email")
+    "App Server Setup")
+      echo "Beginning App Server Setup"
+      setup_base
+      setup_docker
+      setup_portainer
+      echo "Finished App Server Setup"
+      read -n 1 -s -r -p "Press any key to reboot"
+      reboot
+    "Email Setup")
       setup_email
       break
       ;;
-    "Update Portainer")
+    "Portainer Setup")
       setup_portainer
       break
       ;;
