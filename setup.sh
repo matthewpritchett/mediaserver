@@ -1,25 +1,5 @@
 #!/bin/bash
 
-function delete_config() {
-  local filename=$1
-  local key=$2
-
-  sed --in-place "/^$key/d" "$filename"
-  sed -i -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$filename"
-  echo "" >> "$filename"
-}
-
-function upsert_config() {
-  local filename=$1
-  local key=$2
-  local separator=$3
-  local value=$4
-
-  delete_config "$filename" "$key"
-  echo "$key$separator$value" >> "$filename"
-  echo "" >> "$filename"
-}
-
 function replace_text() {
   local filename=$1
   local old=$2
@@ -30,8 +10,7 @@ function replace_text() {
 
 function setup_ssh() {
   echo "Beginning SSH Setup"
-  upsert_config "/etc/ssh/sshd_config" "PermitRootLogin" " " "no"
-  upsert_config "/etc/ssh/sshd_config" "PasswordAuthentication" " " "no"
+  install -m 644 -o root -g root ./etc/ssh/sshd_config /etc/ssh
   systemctl reload sshd
   echo "Finished SSH Setup"
 }
@@ -49,14 +28,23 @@ function setup_media_user() {
 }
 
 function setup_samba() {
+  echo "Beginning Samba Setup"
   DEBIAN_FRONTEND=noninteractive apt-get -yqq install samba cockpit-file-sharing
   install -m 644 -o root -g root ./etc/samba/smb.conf /etc/samba
   echo "SMB password is used for accessing the network shares."
   smbpasswd -a media
   service smbd restart
+  echo "Finished Samba Setup"
+}
+
+function setup_avahi() {
+  echo "Beginning Avahi Setup"
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install davahi-daemon
+  echo "Finished Avahi Setup"
 }
 
 function setup_networking() {
+  echo "Beginning Networking Setup"
   #install network manager
   DEBIAN_FRONTEND=noninteractive apt-get -yqq install network-manager
 
@@ -74,6 +62,7 @@ function setup_networking() {
   install -m 644 -o root -g root ./etc/netplan/00-installer-config.yaml /etc/netplan
   netplan generate
   netplan apply
+  echo "Finished Networking Setup"
 }
 
 function  setup_cockpit() {
@@ -128,22 +117,19 @@ function setup_cloud-init() {
 function setup_zfs() {
   echo "Starting ZFS Setup"
   DEBIAN_FRONTEND=noninteractive apt-get -yqq install zfsutils-linux cockpit-zfs-manager
-  upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_NOTIFY_VERBOSE" "=" "1"
-  upsert_config "/etc/zfs/zed.d/zed.rc" "ZED_EMAIL_ADDR" "=" "root"
-  zpool import vault
+  install -m 644 -o root -g root ./etc/zfs/zed.d/zed.rc /etc/zfs/zed.d
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.timer /etc/systemd/system
-  install -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.service /etc/systemd/system
   systemctl daemon-reload
   systemctl enable --now zpool-scrub@vault.timer
-  systemctl enable --now docker-wait-zfs.service
+  zpool import -d /dev/disk/by-id -a
   echo "Finished ZFS Setup"
 }
 
 function setup_hdd_monitoring() {
   echo "Starting HDD Monitoring Setup"
   DEBIAN_FRONTEND=noninteractive apt-get -yqq install smartmontools
-  upsert_config "/etc/smartd.conf" "DEVICESCAN" " " "-a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,38,45 -m root"
+  install -m 644 -o root -g root ./etc/smartd.conf /etc
   echo "Finished HDD Monitoring Setup"
 }
 
@@ -157,33 +143,25 @@ function setup_portainer() {
   docker run -d -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
 }
 
+function setup_yacht() {
+  docker run -d -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -v yacht:/config --name yacht selfhostedpro/yacht
+}
+
 function setup_nut() {
   DEBIAN_FRONTEND=noninteractive apt-get -yqq  install nut
 
   local upspassword
   upspassword=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 10)
 
-  upsert_config "/etc/nut/nut.conf" "MODE=" "standalone"
+  install -m 460 -o root -g nut ./etc/nut/nut.conf /etc/nut
 
   install -m 460 -o root -g nut ./etc/nut/upsd.users /etc/nut
-  replace_text "/etc/nut/upsd.users" "UPSPASSWORD" $upspassword
+  replace_text "/etc/nut/upsd.users" "UPSPASSWORD" "$upspassword"
 
   install -m 460 -o root -g nut ./etc/nut/ups.conf /etc/nut
 
-  upsert_config "/etc/nut/upsmon.conf" "MONITOR" " cyberp@localhost 1 upsmon $upspassword master"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYCMD" " /usr/sbin/upssched"
-  upsert_config "/etc/nut/upsmon.conf" "DEADTIME" " 25"
-  delete_config "/etc/nut/upsmon.conf" "POWERDOWNFLAG"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG ONLINE" "       SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG ONBATT" "       SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG LOWBATT" "      SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG FSD" "          SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG COMMOK" "       SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG COMMBAD" "      SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG SHUTDOWN" "     SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG REPLBATT" "     SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG NOCOMM" "       SYSLOG+EXEC"
-  upsert_config "/etc/nut/upsmon.conf" "NOTIFYFLAG NOPARENT" "     SYSLOG+EXEC"
+  install -m 460 -o root -g nut ./etc/nut/upsmon.conf /etc/nut
+  replace_text "/etc/nut/upsmon.conf" "UPSPASSWORD" "$upspassword"
 
   install -m 755 -o root -g root ./usr/bin/upssched-cmd /usr/bin
   install -m 460 -o root -g nut ./etc/nut/upssched.conf /etc/nut
@@ -238,9 +216,12 @@ do
       setup_base
       setup_docker
       setup_portainer
+      setup_yacht
       echo "Finished App Server Setup"
       read -n 1 -s -r -p "Press any key to reboot"
       reboot
+      break
+      ;;
     "Email Setup")
       setup_email
       break
