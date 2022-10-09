@@ -80,7 +80,7 @@ function setup_email() {
   echo "Beginning Email Setup"
   DEBIAN_FRONTEND=noninteractive apt-get -yqq install bsd-mailx msmtp msmtp-mta
 
-  read -r -p "Enter the SMTP Username (your_email@gamil.com): " smtpUser
+  read -r -p "Enter the SMTP Username (your_email@gmail.com): " smtpUser
   read -r -p "Enter the SMTP Password: " -s smtpPassword
   echo ""
   read -r -p "Enter the SMTP Server (smtp.gmail.com): " smtpServer
