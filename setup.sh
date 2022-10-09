@@ -175,6 +175,7 @@ function setup_base() {
   setup_networking
   setup_cloud-init
   setup_fail2ban
+  setup_avahi
   setup_email
   setup_ssh
   setup_media_user
