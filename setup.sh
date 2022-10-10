@@ -69,11 +69,17 @@ function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
   curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
   sudo bash setup-repo.sh
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install cockpit cockpit-navigator cockpit-machines
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install cockpit cockpit-navigator
   systemctl unmask cockpit
   systemctl enable cockpit
   systemctl start cockpit
   echo "Finished Cockpit Setup"
+}
+
+function setup_virtual_machines() {
+  echo "Beginning Virtual Machine Setup"
+  DEBIAN_FRONTEND=noninteractive apt-get -yqq install cockpit-machines
+  echo "Finished Virtual Machine Setup"
 }
 
 function setup_email() {
@@ -144,7 +150,7 @@ function setup_portainer() {
 }
 
 function setup_yacht() {
-  docker run -d -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -v yacht:/config --name yacht selfhostedpro/yacht
+  docker run -d -p 8000:8000 --restart=always --name yacht -v /var/run/docker.sock:/var/run/docker.sock -v yacht:/config selfhostedpro/yacht
 }
 
 function setup_nut() {
@@ -206,6 +212,8 @@ do
       echo "Beginning Media Server Setup"
       setup_base
       setup_samba
+      setup_nut
+      setup_virtual_machines
       setup_zfs
       echo "Finished Media Server Setup"
       read -n 1 -s -r -p "Press any key to reboot"
