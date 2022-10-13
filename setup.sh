@@ -29,7 +29,7 @@ function setup_media_user() {
 
 function setup_samba() {
   echo "Beginning Samba Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install samba cockpit-file-sharing
+  DEBIAN_FRONTEND=noninteractive apt -yqq install samba ./bin/cockpit-file-sharing_3.2.8-1focal_all.deb
   install -m 644 -o root -g root ./etc/samba/smb.conf /etc/samba
   echo "SMB password is used for accessing the network shares."
   smbpasswd -a media
@@ -39,14 +39,14 @@ function setup_samba() {
 
 function setup_avahi() {
   echo "Beginning Avahi Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install davahi-daemon
+  DEBIAN_FRONTEND=noninteractive apt -yqq install avahi-daemon
   echo "Finished Avahi Setup"
 }
 
 function setup_networking() {
   echo "Beginning Networking Setup"
   #install network manager
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install network-manager
+  DEBIAN_FRONTEND=noninteractive apt -yqq install network-manager
 
   # disable networkd
   systemctl stop systemd-networkd
@@ -67,9 +67,7 @@ function setup_networking() {
 
 function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
-  curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
-  sudo bash setup-repo.sh
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install cockpit cockpit-navigator
+  DEBIAN_FRONTEND=noninteractive apt -yqq install cockpit ./bin/cockpit-navigator_0.5.9-1focal_all.deb
   systemctl unmask cockpit
   systemctl enable cockpit
   systemctl start cockpit
@@ -78,13 +76,13 @@ function  setup_cockpit() {
 
 function setup_virtual_machines() {
   echo "Beginning Virtual Machine Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install cockpit-machines
+  DEBIAN_FRONTEND=noninteractive apt -yqq install cockpit-machines
   echo "Finished Virtual Machine Setup"
 }
 
 function setup_email() {
   echo "Beginning Email Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install bsd-mailx msmtp msmtp-mta
+  DEBIAN_FRONTEND=noninteractive apt -yqq install bsd-mailx msmtp msmtp-mta
 
   read -r -p "Enter the SMTP Username (your_email@gmail.com): " smtpUser
   read -r -p "Enter the SMTP Password: " -s smtpPassword
@@ -110,7 +108,7 @@ function setup_email() {
 
 function setup_fail2ban() {
   echo "Starting Fail2Ban Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install fail2ban
+  DEBIAN_FRONTEND=noninteractive apt -yqq install fail2ban
   echo "Finished Fail2Ban Setup"
 }
 
@@ -122,7 +120,7 @@ function setup_cloud-init() {
 
 function setup_zfs() {
   echo "Starting ZFS Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install zfsutils-linux cockpit-zfs-manager
+  DEBIAN_FRONTEND=noninteractive apt -yqq install zfsutils-linux ./bin/cockpit-zfs-manager_1.3.0-3focal_all.deb
   install -m 644 -o root -g root ./etc/zfs/zed.d/zed.rc /etc/zfs/zed.d
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.timer /etc/systemd/system
@@ -134,27 +132,32 @@ function setup_zfs() {
 
 function setup_hdd_monitoring() {
   echo "Starting HDD Monitoring Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install smartmontools
+  DEBIAN_FRONTEND=noninteractive apt -yqq install smartmontools
   install -m 644 -o root -g root ./etc/smartd.conf /etc
   echo "Finished HDD Monitoring Setup"
 }
 
 function setup_docker() {
   echo "Starting Docker Setup"
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq install docker.io docker-compose
+  DEBIAN_FRONTEND=noninteractive apt -yqq install docker.io docker-compose
   echo "Finished Docker Setup"
 }
 
 function setup_portainer() {
-  docker run -d -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
-}
-
-function setup_yacht() {
-  docker run -d -p 8000:8000 --restart=always --name yacht -v /var/run/docker.sock:/var/run/docker.sock -v yacht:/config selfhostedpro/yacht
+  docker stop portainer
+  docker rm portainer
+  docker pull portainer/portainer-ce:latest
+  docker run -d \
+    -p 9443:9443 \
+    --name portainer \
+    --restart=always \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v portainer_data:/data \
+    portainer/portainer-ce:latest
 }
 
 function setup_nut() {
-  DEBIAN_FRONTEND=noninteractive apt-get -yqq  install nut
+  DEBIAN_FRONTEND=noninteractive apt -yqq  install nut
 
   local upspassword
   upspassword=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 10)
@@ -176,8 +179,16 @@ function setup_nut() {
   service nut-monitor start
 }
 
+function mount_shared_vault() {
+  if ! grep -q 'init-vault' /etc/fstab ; then
+    mkdir /vault
+    echo '# init-vault' >> /etc/fstab
+    echo 'vault    /vault    virtiofs    defaults    0    2' >> /etc/fstab
+  fi
+}
+
 function setup_base() {
-  apt-get update
+  apt update
   setup_networking
   setup_cloud-init
   setup_fail2ban
@@ -223,9 +234,9 @@ do
     "App Server Setup")
       echo "Beginning App Server Setup"
       setup_base
+      mount_shared_vault
       setup_docker
       setup_portainer
-      setup_yacht
       echo "Finished App Server Setup"
       read -n 1 -s -r -p "Press any key to reboot"
       reboot
