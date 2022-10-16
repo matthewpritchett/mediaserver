@@ -144,16 +144,9 @@ function setup_docker() {
 }
 
 function setup_portainer() {
-  docker stop portainer
-  docker rm portainer
-  docker pull portainer/portainer-ce:latest
-  docker run -d \
-    -p 9443:9443 \
-    --name portainer \
-    --restart=always \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v portainer_data:/data \
-    portainer/portainer-ce:latest
+  docker-compose --file /vault/containers/portainer/compose.yaml pull
+  docker-compose --file /vault/containers/portainer/compose.yaml down
+  docker-compose --file /vault/containers/portainer/compose.yaml up --detach
 }
 
 function setup_nut() {
@@ -179,27 +172,6 @@ function setup_nut() {
   service nut-monitor start
 }
 
-function mount_shared_vault() {
-  if ! grep -q 'init-vault' /etc/fstab ; then
-    mkdir /vault
-    echo '# init-vault' >> /etc/fstab
-    echo 'vault    /vault    virtiofs    defaults    0    2' >> /etc/fstab
-  fi
-}
-
-function setup_base() {
-  apt update
-  setup_networking
-  setup_cloud-init
-  setup_fail2ban
-  setup_avahi
-  setup_email
-  setup_ssh
-  setup_media_user
-  setup_hdd_monitoring
-  setup_cockpit
-}
-
 if ! [ "$(id -u)" = 0 ]; then
    echo "The script need to be run as root." >&2
    exit 1
@@ -215,29 +187,29 @@ echo "Server Scripts"
 echo "=================="
 
 PS3="Select the operation: "
-options=("Media Server Setup" "App Server Setup" "Email Setup" "Portainer Setup" "Quit")
+options=("Media Server Setup" "Email Setup" "Portainer Setup" "Quit")
 select opt in "${options[@]}"
 do
   case $opt in
     "Media Server Setup")
       echo "Beginning Media Server Setup"
-      setup_base
+      apt update -y
+      setup_cloud-init
+      setup_networking
+      setup_avahi
+      setup_fail2ban
+      setup_ssh
+      setup_email
+      setup_media_user
+      setup_hdd_monitoring
+      setup_cockpit
       setup_samba
       setup_nut
       setup_virtual_machines
       setup_zfs
-      echo "Finished Media Server Setup"
-      read -n 1 -s -r -p "Press any key to reboot"
-      reboot
-      break
-      ;;
-    "App Server Setup")
-      echo "Beginning App Server Setup"
-      setup_base
-      mount_shared_vault
       setup_docker
       setup_portainer
-      echo "Finished App Server Setup"
+      echo "Finished Media Server Setup"
       read -n 1 -s -r -p "Press any key to reboot"
       reboot
       break
