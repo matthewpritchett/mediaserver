@@ -1,5 +1,9 @@
 #!/bin/bash
 
+red=`tput setaf 1`
+green=`tput setaf 2`
+reset=`tput sgr0`
+
 function replace_text() {
   local filename=$1
   local old=$2
@@ -144,9 +148,15 @@ function setup_docker() {
 }
 
 function setup_portainer() {
-  docker-compose --file /vault/containers/portainer/compose.yaml pull
-  docker-compose --file /vault/containers/portainer/compose.yaml down
-  docker-compose --file /vault/containers/portainer/compose.yaml up --detach
+  echo "${green}Starting Portainer Setup${reset}"
+  if [ -d "/vault/containers/portainer/data" ]; then
+    docker-compose --file ./portainer/compose.yaml pull
+    docker-compose --file ./portainer/compose.yaml down
+    docker-compose --file ./portainer/compose.yaml up --detach
+  else
+    echo "${red}Portainer Data Directory Does Not Exist. ZFS Pool vault may not be imported yet.${reset}"
+  fi
+  echo "${green}Finished Portainer Setup${reset}"
 }
 
 function setup_nut() {
