@@ -144,6 +144,10 @@ function setup_hdd_monitoring() {
 function setup_docker() {
   echo "Starting Docker Setup"
   DEBIAN_FRONTEND=noninteractive apt -yqq install docker.io docker-compose
+  install -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.service /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/docker-compose@.service /etc/systemd/system
+  systemctl enable --now docker-wait-zfs.service
+  systemctl daemon-reload
   echo "Finished Docker Setup"
 }
 
