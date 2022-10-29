@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh images and update containers
+Requires=docker-compose@%i.service
+After=docker-compose@%i.service
+
+[Timer]
+OnCalendar=*:0/15
+
+[Install]
+WantedBy=timers.target

@@ -1,9 +1,5 @@
 #!/bin/bash
 
-red=`tput setaf 1`
-green=`tput setaf 2`
-reset=`tput sgr0`
-
 function replace_text() {
   local filename=$1
   local old=$2
@@ -144,6 +140,7 @@ function setup_hdd_monitoring() {
 function setup_docker() {
   echo "Starting Docker Setup"
   DEBIAN_FRONTEND=noninteractive apt -yqq install docker.io docker-compose
+  install -m 644 -o root -g root ./etc/docker/daemon.json /etc/docker
   install -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose@.service /etc/systemd/system
   systemctl enable --now docker-wait-zfs.service
@@ -151,16 +148,12 @@ function setup_docker() {
   echo "Finished Docker Setup"
 }
 
-function setup_portainer() {
-  echo "${green}Starting Portainer Setup${reset}"
-  if [ -d "/vault/containers/portainer/data" ]; then
-    docker-compose --file ./portainer/compose.yaml pull
-    docker-compose --file ./portainer/compose.yaml down
-    docker-compose --file ./portainer/compose.yaml up --detach
-  else
-    echo "${red}Portainer Data Directory Does Not Exist. ZFS Pool vault may not be imported yet.${reset}"
-  fi
-  echo "${green}Finished Portainer Setup${reset}"
+function setup_docker_apps() {
+  find . -type d -maxdepth 1 -mindepth 1 -print0 | while IFS= read -r -d '' directory
+  do
+    systemctl enable --now docker-compose@"$directory"
+    systemctl start --now docker-compose@"$directory"
+  done
 }
 
 function setup_nut() {
@@ -222,7 +215,7 @@ do
       setup_virtual_machines
       setup_zfs
       setup_docker
-      setup_portainer
+      setup_docker_apps
       echo "Finished Media Server Setup"
       read -n 1 -s -r -p "Press any key to reboot"
       reboot
@@ -244,3 +237,4 @@ do
       ;;
   esac
 done
+
