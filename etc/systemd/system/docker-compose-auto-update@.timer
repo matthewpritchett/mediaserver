@@ -1,5 +1,5 @@
 [Unit]
-Description=auto update %i via docker-compose
+Description=%i auto update via docker-compose
 Requires=docker-compose@%i.service
 After=docker-compose@%i.service
 

@@ -23,7 +23,7 @@ ExecReload=mv compose.yml.bak compose.yml
 ExecReload=chown media:media compose.yml
 ExecReload=/usr/bin/docker-compose pull --ignore-pull-failures
 ExecReload=/usr/bin/docker-compose up --detach
-ExecReload=-/bin/bash -c '/usr/bin/cat /vault/containers/%i/verify.txt | /usr/bin/mail -s "%i has been updated via docker-compose" root'
+ExecReload=-/bin/bash -c '/usr/bin/cat /vault/containers/%i/verify.txt | /usr/bin/mail -s "%i updated via docker-compose" root'
 
 [Install]
 WantedBy=multi-user.target
