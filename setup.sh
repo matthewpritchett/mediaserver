@@ -29,7 +29,7 @@ function setup_media_user() {
 
 function setup_samba() {
   echo "Beginning Samba Setup"
-  DEBIAN_FRONTEND=noninteractive apt -yqq install samba ./bin/cockpit-file-sharing_3.2.8-1focal_all.deb
+  DEBIAN_FRONTEND=noninteractive apt -yqq install samba cockpit-file-sharing
   install -m 644 -o root -g root ./etc/samba/smb.conf /etc/samba
   echo "SMB password is used for accessing the network shares."
   smbpasswd -a media
@@ -67,7 +67,9 @@ function setup_networking() {
 
 function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
-  DEBIAN_FRONTEND=noninteractive apt -yqq install cockpit ./bin/cockpit-navigator_0.5.9-1focal_all.deb
+  curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
+  sudo bash setup-repo.sh
+  DEBIAN_FRONTEND=noninteractive apt -yqq install cockpit cockpit-navigator
   systemctl unmask cockpit
   systemctl enable cockpit
   systemctl start cockpit
@@ -120,7 +122,7 @@ function setup_cloud-init() {
 
 function setup_zfs() {
   echo "Starting ZFS Setup"
-  DEBIAN_FRONTEND=noninteractive apt -yqq install zfsutils-linux ./bin/cockpit-zfs-manager_1.3.0-3focal_all.deb
+  DEBIAN_FRONTEND=noninteractive apt -yqq install zfsutils-linux cockpit-zfs-manager
   install -m 644 -o root -g root ./etc/zfs/zed.d/zed.rc /etc/zfs/zed.d
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.timer /etc/systemd/system
@@ -143,6 +145,8 @@ function setup_docker() {
   install -m 644 -o root -g root ./etc/docker/daemon.json /etc/docker
   install -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose@.service /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/docker-compose-auto-update@.service /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/docker-compose-auto-update@.timer /etc/systemd/system
   systemctl enable --now docker-wait-zfs.service
   systemctl daemon-reload
   echo "Finished Docker Setup"
@@ -151,8 +155,8 @@ function setup_docker() {
 function setup_docker_apps() {
   find . -type d -maxdepth 1 -mindepth 1 -print0 | while IFS= read -r -d '' directory
   do
-    systemctl enable --now docker-compose@"$directory"
-    systemctl start --now docker-compose@"$directory"
+    systemctl enable --now docker-compose@"$directory".service
+    systemctl enable --now docker-compose-auto-update@"$directory".timer
   done
 }
 

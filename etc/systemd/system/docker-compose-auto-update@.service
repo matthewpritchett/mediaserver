@@ -1,5 +1,5 @@
 [Unit]
-Description=Refresh images and update containers
+Description=auto update %i via docker-compose
 
 [Service]
 Type=oneshot
