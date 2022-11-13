@@ -149,9 +149,9 @@ function setup_docker() {
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose-auto-update@.timer /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-prune.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-prune.timer /etc/systemd/system
+  systemctl daemon-reload
   systemctl enable --now docker-wait-zfs.service
   systemctl enable --now docker-prune.timer
-  systemctl daemon-reload
   echo "Finished Docker Setup"
 }
 
@@ -201,7 +201,7 @@ echo "Server Scripts"
 echo "=================="
 
 PS3="Select the operation: "
-options=("Media Server Setup" "Email Setup" "Portainer Setup" "Quit")
+options=("Media Server Setup" "Email Setup" "Quit")
 select opt in "${options[@]}"
 do
   case $opt in
@@ -230,10 +230,6 @@ do
       ;;
     "Email Setup")
       setup_email
-      break
-      ;;
-    "Portainer Setup")
-      setup_portainer
       break
       ;;
     "Quit")
