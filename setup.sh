@@ -69,7 +69,7 @@ function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
   curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
   sudo bash setup-repo.sh
-  DEBIAN_FRONTEND=noninteractive apt -yqq install cockpit cockpit-navigator
+  DEBIAN_FRONTEND=noninteractive apt -yqq install cockpit cockpit-navigator tuned
   systemctl unmask cockpit
   systemctl enable cockpit
   systemctl start cockpit
