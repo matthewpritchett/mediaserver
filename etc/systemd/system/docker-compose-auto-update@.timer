@@ -4,7 +4,7 @@ Requires=docker-compose@%i.service
 After=docker-compose@%i.service
 
 [Timer]
-OnCalendar=*-*-28 02:00:00
+OnCalendar=*-*-28 01:00:00
 Persistent=true
 RandomizedDelaySec=3h
 
