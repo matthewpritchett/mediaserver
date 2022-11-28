@@ -6,6 +6,7 @@ After=docker-compose@%i.service
 [Timer]
 OnCalendar=*-*-28 02:00:00
 Persistent=true
+RandomizedDelaySec=2h
 
 [Install]
 WantedBy=timers.target
