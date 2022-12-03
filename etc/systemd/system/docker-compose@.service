@@ -9,6 +9,8 @@ After=docker.service
 Type=oneshot
 RemainAfterExit=true
 WorkingDirectory=/vault/containers/%i
+Environment="DOCKER_CLIENT_TIMEOUT=360"
+Environment="COMPOSE_HTTP_TIMEOUT=360"
 ExecStart=/usr/bin/docker-compose up --detach --force-recreate
 ExecStop=/usr/bin/docker-compose down
 # Reload backs up the compose file, pins image tags, takes zfs snapshot,

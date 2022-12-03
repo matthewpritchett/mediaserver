@@ -4,9 +4,9 @@ Requires=docker-compose@%i.service
 After=docker-compose@%i.service
 
 [Timer]
-OnCalendar=*-*-28 01:00:00
+OnCalendar=*-*-28 00:00:00
 Persistent=true
-RandomizedDelaySec=3h
+RandomizedDelaySec=6h
 
 [Install]
 WantedBy=timers.target
