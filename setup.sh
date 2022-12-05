@@ -156,11 +156,10 @@ function setup_docker() {
 }
 
 function setup_docker_apps() {
-  find . -type d -maxdepth 1 -mindepth 1 -print0 | while IFS= read -r -d '' directory
-  do
-    systemctl enable --now docker-compose@"$directory".service
-    systemctl enable --now docker-compose-auto-update@"$directory".timer
-  done
+    docker network create --label=mediaserver mediaserver
+
+    #systemctl enable --now docker-compose@appname.service
+    #systemctl enable --now docker-compose-auto-update@appname.timer
 }
 
 function setup_nut() {
