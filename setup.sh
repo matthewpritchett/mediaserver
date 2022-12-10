@@ -158,8 +158,16 @@ function setup_docker() {
 function setup_docker_apps() {
     docker network create --label=mediaserver mediaserver
 
-    #systemctl enable --now docker-compose@appname.service
-    #systemctl enable --now docker-compose-auto-update@appname.timer
+    APPS=(
+        jellyfin
+        lidarr
+        nzbhydra2
+    )
+
+    for APP in "${APPS[@]}"; do
+        systemctl enable --now docker-compose@"$APP".service
+        systemctl enable --now docker-compose-auto-update@"$APP".timer
+    done
 }
 
 function setup_nut() {
