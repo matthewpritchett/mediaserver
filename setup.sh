@@ -162,6 +162,9 @@ function setup_docker_apps() {
         jellyfin
         lidarr
         nzbhydra2
+        radarr
+        readarr
+        sonarr
     )
 
     for APP in "${APPS[@]}"; do
