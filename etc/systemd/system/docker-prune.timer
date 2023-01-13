@@ -1,7 +1,5 @@
 [Unit]
 Description=docker - Remove all unused containers, networks, images (both dangling and unreferenced)
-Requires=docker.service
-After=docker.service
 
 [Timer]
 OnCalendar=*-*-27 02:00:00

@@ -1,7 +1,5 @@
 [Unit]
 Description=%i auto update via docker-compose
-Requires=docker-compose@%i.service
-After=docker-compose@%i.service
 
 [Timer]
 OnCalendar=*-*-28 00:00:00

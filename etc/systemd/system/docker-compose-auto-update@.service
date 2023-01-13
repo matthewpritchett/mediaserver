@@ -1,5 +1,7 @@
 [Unit]
 Description=%i auto update via docker-compose
+Requires=docker-compose@%i.service
+After=docker-compose@%i.service
 
 [Service]
 Type=oneshot

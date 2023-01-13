@@ -1,8 +1,11 @@
 [Unit]
 Description=docker - Remove all unused containers, networks, images (both dangling and unreferenced)
+Requires=zfs.target
 Requires=docker.service
+After=zfs.target
 After=docker.service
 
 [Service]
 Type=oneshot
+ExecStart=/usr/local/bin/zfs-prune-snapshots -v 1y vault/containers
 ExecStart=/usr/bin/docker system prune --filter "label!=mediaserver" --force
