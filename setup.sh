@@ -147,6 +147,7 @@ function setup_docker() {
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose-auto-update@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose-auto-update@.timer /etc/systemd/system
+  install -m 755 -o root -g root ./usr/local/bin/zfs-prune-snapshots /usr/local/bin
   install -m 644 -o root -g root ./etc/systemd/system/docker-prune.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-prune.timer /etc/systemd/system
   systemctl daemon-reload
