@@ -190,7 +190,7 @@ function setup_nut() {
   install -m 460 -o root -g nut ./etc/nut/upsmon.conf /etc/nut
   replace_text "/etc/nut/upsmon.conf" "UPSPASSWORD" "$upspassword"
 
-  install -m 755 -o root -g root ./usr/bin/upssched-cmd /usr/bin
+  install -m 755 -o root -g root ./usr/local/bin/upssched-cmd /usr/local/bin
   install -m 460 -o root -g nut ./etc/nut/upssched.conf /etc/nut
 
   service nut-server start
