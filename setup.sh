@@ -160,12 +160,23 @@ function setup_docker_apps() {
     docker network create --label=mediaserver mediaserver
 
     APPS=(
+        cloudsync
         jellyfin
         lidarr
         nzbhydra2
+        owncloud
+        photoprism
+        portainer
+        prowlarr
+        qbittorrentvpn
         radarr
         readarr
+        reverseproxy
+        sabnzbd
         sonarr
+        tinyhome
+        tinystatus
+        ubooquity
     )
 
     for APP in "${APPS[@]}"; do
@@ -195,6 +206,10 @@ function setup_nut() {
 
   service nut-server start
   service nut-monitor start
+}
+
+function setup_backups() {
+  install -m 755 -o root -g root ./usr/local/bin/kopia /usr/local/bin
 }
 
 if ! [ "$(id -u)" = 0 ]; then
