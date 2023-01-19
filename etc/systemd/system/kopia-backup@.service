@@ -1,0 +1,12 @@
+[Unit]
+Description=kopia backup to %i
+Requires=zfs.target
+After=zfs.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/vault/backups/kopia/%i/.env
+ExecStartPre=/bin/bash -c 'curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${healthcheck-uuid}/start'
+ExecStart=/usr/local/bin/kopia snapshot
+ExecStart=/usr/local/bin/kopia maintenance
+ExecStartPost=/bin/bash -c 'curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${healthcheck-uuid}'
