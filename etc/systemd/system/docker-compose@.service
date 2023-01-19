@@ -20,6 +20,7 @@ ExecReload=chown media:media compose.yml.bak
 ExecReload=/bin/bash -c '/usr/bin/docker-compose config --resolve-image-digests > compose.yml.new'
 ExecReload=mv compose.yml.new compose.yml
 ExecReload=chown media:media compose.yml
+ExecReload=/usr/bin/docker-compose down
 ExecReload=/bin/bash -c '/usr/sbin/zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S)'
 ExecReload=mv compose.yml.bak compose.yml
 ExecReload=chown media:media compose.yml
