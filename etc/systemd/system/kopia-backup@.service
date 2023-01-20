@@ -7,7 +7,7 @@ After=zfs.target
 Type=oneshot
 EnvironmentFile=/vault/backups/kopia/%i/.env
 ExecStartPre=/usr/bin/curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${HEALTHCHECK_UUID}/start
-ExecStart=/usr/local/bin/kopia snapshot ${LOCAL_BACKUP_SOURCES}
+ExecStart=/usr/local/bin/kopia snapshot create ${LOCAL_BACKUP_SOURCES}
 ExecStart=bash -c \
     'if [[ $$(/usr/bin/date +%%u) -eq 5 ]]; \
     then usr/local/bin/kopia maintenance run --full; \
