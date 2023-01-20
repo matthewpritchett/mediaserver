@@ -210,6 +210,10 @@ function setup_nut() {
 
 function setup_backups() {
   install -m 755 -o root -g root ./usr/local/bin/kopia /usr/local/bin
+  install -m 644 -o root -g root ./etc/systemd/system/kopia-backup@.service /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/kopia-backup@.timer /etc/systemd/system
+  systemctl enable --now kopia-backup@backblaze-b2.timer
+  systemctl enable --now kopia-backup@storj.timer
 }
 
 if ! [ "$(id -u)" = 0 ]; then

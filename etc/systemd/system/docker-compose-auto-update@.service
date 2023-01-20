@@ -5,5 +5,4 @@ After=docker-compose@%i.service
 
 [Service]
 Type=oneshot
-
 ExecStart=/bin/systemctl reload docker-compose@%i.service
