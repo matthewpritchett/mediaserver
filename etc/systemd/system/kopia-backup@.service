@@ -6,7 +6,11 @@ After=zfs.target
 [Service]
 Type=oneshot
 EnvironmentFile=/vault/backups/kopia/%i/.env
-ExecStartPre=/bin/bash -c 'curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${healthcheck-uuid}/start'
-ExecStart=/usr/local/bin/kopia snapshot
-ExecStart=/usr/local/bin/kopia maintenance
-ExecStartPost=/bin/bash -c 'curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${healthcheck-uuid}'
+ExecStartPre=/usr/bin/curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${HEALTHCHECK_UUID}/start
+#ExecStart=/usr/local/bin/kopia snapshot ${LOCAL_BACKUP_SOURCES}
+ExecStart=if [[ $(/usr/bin/date +%%u) -eq 7 ]]; then \
+            echo "equals"; \
+          else \
+            echo "not equals"; \
+          fi
+ExecStartPost=/usr/bin/curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${HEALTHCHECK_UUID}
