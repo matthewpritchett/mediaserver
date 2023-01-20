@@ -8,7 +8,7 @@ Type=oneshot
 EnvironmentFile=/vault/backups/kopia/%i/.env
 ExecStartPre=/usr/bin/curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${HEALTHCHECK_UUID}/start
 #ExecStart=/usr/local/bin/kopia snapshot ${LOCAL_BACKUP_SOURCES}
-ExecStart=if [[ $(/usr/bin/date +%%u) -eq 7 ]]; then \
+ExecStart=if [[ $$(/usr/bin/date +%%u) -eq 7 ]]; then \
             echo "equals"; \
           else \
             echo "not equals"; \
