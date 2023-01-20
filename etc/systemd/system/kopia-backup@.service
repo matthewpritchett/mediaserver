@@ -10,3 +10,7 @@ ExecStartPre=/usr/bin/curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com
 #ExecStart=/usr/local/bin/kopia snapshot ${LOCAL_BACKUP_SOURCES}
 ExecStart=bash -c 'if [[ $$(/usr/bin/date +%%u) -eq 7 ]]; then echo "equals"; else echo "not equals"; fi
 ExecStartPost=/usr/bin/curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/${HEALTHCHECK_UUID}
+
+[Install]
+WantedBy=multi-user.target
+
