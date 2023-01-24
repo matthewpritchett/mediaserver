@@ -160,6 +160,8 @@ function setup_docker_apps() {
     docker network create --label=mediaserver mediaserver
 
     APPS=(
+        calibre
+        calibre-web
         cloudsync
         jellyfin
         lidarr
