@@ -6,6 +6,7 @@ After=docker-compose-test@%i.service
 [Service]
 Type=oneshot
 WorkingDirectory=/vault/containers/%i
+
 # Backs up the compose file, pins image tags, takes zfs snapshot,
 # moves original compose file back, then pulls latest and starts
 ExecStart=/usr/bin/docker-compose down
@@ -20,3 +21,6 @@ ExecStart=/usr/bin/chown media:media compose.yml
 ExecStart=/usr/bin/docker-compose pull --ignore-pull-failures
 ExecStart=/bin/systemctl restart docker-compose-test@%i.service
 ExecStart=-/bin/bash -c '/usr/bin/cat /vault/containers/%i/info.txt | /usr/bin/mail -s "%i updated via docker-compose" root'
+
+# Always make sure to restart the app if something fails here
+ExecStopPost=/bin/systemctl restart docker-compose-test@%i.service
