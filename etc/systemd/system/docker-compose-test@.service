@@ -10,7 +10,7 @@ Type=exec
 WorkingDirectory=/vault/containers/%i
 Environment="DOCKER_CLIENT_TIMEOUT=360"
 Environment="COMPOSE_HTTP_TIMEOUT=360"
-ExecStart=/usr/bin/docker-compose up --force-recreate
+ExecStart=/usr/bin/docker-compose up --force-recreate --no-log-prefix
 ExecStop=/usr/bin/docker-compose down
 
 [Install]
