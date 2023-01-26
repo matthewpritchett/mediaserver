@@ -142,11 +142,10 @@ function setup_hdd_monitoring() {
 function setup_docker() {
   echo "Starting Docker Setup"
   DEBIAN_FRONTEND=noninteractive apt -yqq install docker.io docker-compose
-  install -m 644 -o root -g root ./etc/docker/daemon.json /etc/docker
   install -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose@.service /etc/systemd/system
-  install -m 644 -o root -g root ./etc/systemd/system/docker-compose-auto-update@.service /etc/systemd/system
-  install -m 644 -o root -g root ./etc/systemd/system/docker-compose-auto-update@.timer /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/docker-compose-update@.service /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/docker-compose-update@.timer /etc/systemd/system
   install -m 755 -o root -g root ./usr/local/bin/zfs-prune-snapshots /usr/local/bin
   install -m 644 -o root -g root ./etc/systemd/system/docker-prune.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-prune.timer /etc/systemd/system
@@ -178,12 +177,11 @@ function setup_docker_apps() {
         sonarr
         tinyhome
         tinystatus
-        ubooquity
     )
 
     for APP in "${APPS[@]}"; do
         systemctl enable --now docker-compose@"$APP".service
-        systemctl enable --now docker-compose-auto-update@"$APP".timer
+        systemctl enable --now docker-compose-update@"$APP".timer
     done
 }
 
