@@ -1,5 +1,5 @@
 [Unit]
-Description=%i update via docker-compose
+Description=update %i via docker-compose
 Requires=docker-compose@%i.service
 After=docker-compose@%i.service
 
