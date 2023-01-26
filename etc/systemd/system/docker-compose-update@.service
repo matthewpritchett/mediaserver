@@ -1,11 +1,13 @@
 [Unit]
 Description=%i update via docker-compose
-Requires=docker-compose-test@%i.service
-After=docker-compose-test@%i.service
+Requires=docker-compose@%i.service
+After=docker-compose@%i.service
 
 [Service]
 Type=oneshot
 WorkingDirectory=/vault/containers/%i
+Environment="DOCKER_CLIENT_TIMEOUT=360"
+Environment="COMPOSE_HTTP_TIMEOUT=360"
 
 # Backs up the compose file, pins image tags, takes zfs snapshot,
 # moves original compose file back, then pulls latest and starts
@@ -22,4 +24,4 @@ ExecStart=/usr/bin/docker-compose pull --ignore-pull-failures
 ExecStart=-/bin/bash -c '/usr/bin/cat /vault/containers/%i/info.txt | /usr/bin/mail -s "%i updated via docker-compose" root'
 
 # Always make sure to restart the app
-ExecStopPost=/bin/systemctl restart docker-compose-test@%i.service
+ExecStopPost=/bin/systemctl restart docker-compose@%i.service
