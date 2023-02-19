@@ -1,0 +1,17 @@
+Name: 45Drives Repo - focal Stable
+Enabled: yes
+Types: deb
+URIs: https://repo.45drives.com/debian
+Suites: focal
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/45drives-archive-keyring.gpg
+
+Name: 45Drives Repo - focal Testing
+Enabled: no
+Types: deb
+URIs: https://repo.45drives.com/debian
+Suites: focal
+Components: testing
+Architectures: amd64
+Signed-By: /usr/share/keyrings/45drives-archive-keyring.gpg

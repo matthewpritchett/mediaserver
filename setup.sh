@@ -67,8 +67,9 @@ function setup_networking() {
 
 function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
-  curl -sSL https://repo.45drives.com/setup -o setup-repo.sh
-  sudo bash setup-repo.sh
+  install -m 644 -o root -g root ./usr/share/keyrings/45drives-archive-keyring.gpg /usr/share/keyrings
+  install -m 644 -o root -g root ./etc/apt/sources.list.d/45drives.sources /etc/apt/sources.list.d
+  apt update
   DEBIAN_FRONTEND=noninteractive apt -yqq install cockpit cockpit-navigator tuned
   systemctl unmask cockpit
   systemctl enable cockpit
@@ -124,10 +125,7 @@ function setup_zfs() {
   echo "Starting ZFS Setup"
   DEBIAN_FRONTEND=noninteractive apt -yqq install zfsutils-linux cockpit-zfs-manager
   install -m 644 -o root -g root ./etc/zfs/zed.d/zed.rc /etc/zfs/zed.d
-  install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.service /etc/systemd/system
-  install -m 644 -o root -g root ./etc/systemd/system/zpool-scrub@.timer /etc/systemd/system
   systemctl daemon-reload
-  systemctl enable --now zpool-scrub@vault.timer
   zpool import -d /dev/disk/by-id -a
   echo "Finished ZFS Setup"
 }
