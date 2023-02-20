@@ -69,7 +69,7 @@ function  setup_cockpit() {
   echo "Beginning Cockpit Setup"
   install -m 644 -o root -g root ./usr/share/keyrings/45drives-archive-keyring.gpg /usr/share/keyrings
   install -m 644 -o root -g root ./etc/apt/sources.list.d/45drives.sources /etc/apt/sources.list.d
-  apt update
+  DEBIAN_FRONTEND=noninteractive apt update -yqq
   DEBIAN_FRONTEND=noninteractive apt -yqq install cockpit cockpit-navigator tuned
   systemctl unmask cockpit
   systemctl enable cockpit
