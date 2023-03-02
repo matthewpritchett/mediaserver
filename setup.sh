@@ -252,6 +252,7 @@ do
       setup_zfs
       setup_docker
       setup_docker_apps
+      setup_backups
       echo "Finished Media Server Setup"
       read -n 1 -s -r -p "Press any key to reboot"
       reboot
