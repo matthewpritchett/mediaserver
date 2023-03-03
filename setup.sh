@@ -211,8 +211,9 @@ function setup_backups() {
   install -m 644 -o root -g root ./etc/systemd/system/kopia-backup@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/kopia-backup@.timer /etc/systemd/system
   systemctl daemon-reload
-  systemctl enable --now kopia-backup@backblaze-b2.timer
-  systemctl enable --now kopia-backup@storj.timer
+  systemctl enable --now kopia-backup@backblazeb2-vault-media-text.timer
+  systemctl enable --now kopia-backup@backblazeb2-vault-media-image.timer
+  systemctl enable --now kopia-backup@storj-vault-media-text.timer
 }
 
 if ! [ "$(id -u)" = 0 ]; then
