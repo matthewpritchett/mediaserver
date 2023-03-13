@@ -159,7 +159,6 @@ function setup_docker_apps() {
     APPS=(
         calibre
         calibre-web
-        cloudsync
         jellyfin
         lidarr
         nzbhydra2
