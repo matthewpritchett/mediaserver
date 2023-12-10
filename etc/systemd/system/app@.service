@@ -19,7 +19,7 @@ ExecStartPre=/bin/bash -c '[ ! -f no-update ] && touch no-update && zfs snapshot
 ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && while read -r remote local; do skopeo copy "docker://${remote}" "oci:images/${local}"; done < images/mappings.txt;'
 
 # push local images to the docker daemon
-ExecStartPre=/bin/bash -c 'while read -r remote local; do skopeo copy "oci:images/${local}" "docker-daemon:${local}"; done < images/mappings.txt;'
+ExecStartPre=-/bin/bash -c 'while read -r remote local; do skopeo copy "oci:images/${local}" "docker-daemon:${local}"; done < images/mappings.txt;'
 
 # start the app via docker compose
 ExecStart=/usr/bin/docker-compose up --remove-orphans --force-recreate --no-log-prefix --renew-anon-volumes --abort-on-container-exit
