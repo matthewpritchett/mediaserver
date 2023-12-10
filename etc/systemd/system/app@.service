@@ -16,7 +16,7 @@ Environment="COMPOSE_HTTP_TIMEOUT=900"
 ExecStartPre=/bin/bash -c '[ ! -f no-update ] && touch no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
 
 # pull latest images to local directory if updates enabled
-ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && while read -r remote local; do skopeo copy "docker://${remote}" "oci:images/${local}"; done < images/mappings.txt; && cat /vault/containers/%i/info.txt | mail -s "%i updated" root'
+ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && while read -r remote local; do skopeo copy "docker://${remote}" "oci:images/${local}"; done < images/mappings.txt;'
 
 # push local images to the docker daemon
 ExecStartPre=/bin/bash -c 'while read -r remote local; do skopeo copy "oci:${images/local}" "docker-daemon:${images/local}"; done < images/mappings.txt;'
