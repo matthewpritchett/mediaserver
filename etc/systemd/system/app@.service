@@ -1,0 +1,31 @@
+[Unit]
+Description=%i
+Requires=zfs.target
+After=zfs.target
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=exec
+WorkingDirectory=/vault/containers/%i
+TimeoutSec=900
+Environment="DOCKER_CLIENT_TIMEOUT=900"
+Environment="COMPOSE_HTTP_TIMEOUT=900"
+
+# create snapshot with updates disabled
+ExecStartPre=/bin/bash -c '[ ! -f no-update ] && touch no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update
+
+# pull latest images to local directory if updates enabled
+ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && while read -r remote local; do skopeo copy "docker://${remote}" "oci:images/${local}"; done < images/mappings.txt; && cat /vault/containers/%i/info.txt | mail -s "%i updated" root'
+
+# push local images to the docker daemon
+ExecStartPre=/bin/bash -c 'while read -r remote local; do skopeo copy "oci:${images/local}" "docker-daemon:${images/local}"; done < images/mappings.txt;'
+
+# start the app via docker compose
+ExecStart=/usr/bin/docker-compose up --remove-orphans --force-recreate --no-log-prefix --renew-anon-volumes --abort-on-container-exit
+
+# stop the app via docker compose 
+ExecStop=/usr/bin/docker-compose down --remove-orphans
+
+[Install]
+WantedBy=multi-user.target
