@@ -18,6 +18,9 @@ ExecStartPre=/bin/bash -c '[ ! -f no-update ] && touch no-update && zfs snapshot
 # pull latest images to local directory if updates enabled
 ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && while read -r remote local; do skopeo copy docker://"$remote" oci:images/"$local"; done < images/mappings.txt;'
 
+# email if updates enabled
+ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && cat info.txt | mail -s "%i updated" root'
+
 # push local images to the docker daemon
 ExecStartPre=/bin/bash -c 'while read -r remote local; do skopeo copy oci:images/"$local" docker-daemon:"$local"; done < images/mappings.txt;'
 
