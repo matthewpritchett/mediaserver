@@ -1,27 +1,10 @@
 [Unit]
-Description=update %i via docker-compose
+Description=update %i
 Requires=docker-compose@%i.service
 After=docker-compose@%i.service
 
 [Service]
 Type=oneshot
-WorkingDirectory=/vault/containers/%i
-Environment="DOCKER_CLIENT_TIMEOUT=360"
-Environment="COMPOSE_HTTP_TIMEOUT=360"
 
-# Backs up the compose file, pins image tags, takes zfs snapshot,
-# moves original compose file back, then pulls latest and starts
-ExecStart=/usr/bin/docker-compose down --remove-orphans
-ExecStart=/usr/bin/cp compose.yml compose.yml.bak
-ExecStart=/usr/bin/chown media:media compose.yml.bak
-ExecStart=/bin/bash -c '/usr/bin/docker-compose config --resolve-image-digests > compose.yml.new'
-ExecStart=/usr/bin/mv compose.yml.new compose.yml
-ExecStart=/usr/bin/chown media:media compose.yml
-ExecStart=/bin/bash -c '/usr/sbin/zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S)'
-ExecStart=/usr/bin/mv compose.yml.bak compose.yml
-ExecStart=/usr/bin/chown media:media compose.yml
-ExecStart=/usr/bin/docker-compose pull --ignore-pull-failures
-ExecStart=-/bin/bash -c '/usr/bin/cat /vault/containers/%i/info.txt | /usr/bin/mail -s "%i updated via docker-compose" root'
-
-# Always make sure to restart the app
-ExecStopPost=/bin/systemctl restart docker-compose@%i.service
+# Restart the app
+ExecStart=/bin/systemctl restart docker-compose@%i.service
