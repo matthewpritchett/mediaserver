@@ -7,4 +7,4 @@ After=docker-compose@%i.service
 Type=oneshot
 
 # Restart the app
-ExecStart=/bin/systemctl restart docker-compose@%i.service
+ExecStart=+/bin/systemctl restart docker-compose@%i.service
