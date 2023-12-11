@@ -13,7 +13,7 @@ Environment="DOCKER_CLIENT_TIMEOUT=900"
 Environment="COMPOSE_HTTP_TIMEOUT=900"
 
 # create snapshot with updates disabled
-ExecStartPre=/bin/bash -c '[ ! -f no-update ] && touch no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
+ExecStartPre=/bin/bash -c '[ ! -f no-update ] && touch no-update && chown media:media no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
 
 # pull latest images to local directory if updates enabled
 ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && while read -r remote local; do skopeo copy docker://"$remote" oci:images/"$local"; done < images/mappings.txt;'
