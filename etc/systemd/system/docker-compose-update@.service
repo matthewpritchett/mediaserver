@@ -1,10 +1,28 @@
 [Unit]
 Description=update %i
-Requires=docker-compose@%i.service
-After=docker-compose@%i.service
+ConditionPathExists=!/vault/containers/%i/no-update
+Requires=zfs.target
+After=zfs.target
 
 [Service]
 Type=oneshot
+WorkingDirectory=/vault/containers/%i
+TimeoutSec=900
+
+# stop the service
+ExecStart=+/bin/systemctl stop docker-compose@%i.service
+
+# put timestamp
+ExecStart=/bin/bash -c "echo $(date +%%T.%%N)"
+
+# create snapshot with updates disabled
+ExecStart=/bin/bash -c 'touch no-update && chown media:media no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
+
+# pull latest images to local directory if updates enabled
+ExecStart=/bin/bash -c 'while read -r remote local; do skopeo copy docker://"$remote" oci:images/"$local"; done < images/mappings.txt;'
+
+# email if updates enabled
+ExecStartPost=-/bin/bash -c 'cat info.txt | mail -s "%i updated" root'
 
 # Restart the app
-ExecStart=+/bin/systemctl restart docker-compose@%i.service
+ExecStopPost=+/bin/systemctl start docker-compose@%i.service
