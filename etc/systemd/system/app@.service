@@ -1,0 +1,32 @@
+[Unit]
+Description=%i
+
+[Service]
+Type=simple
+WorkingDirectory=/vault/containers/%i
+TimeoutSec=900
+
+# create snapshot with updates disabled
+ExecStartPre=/bin/bash -c '[ ! -f no-update ] && touch no-update && chown media:media no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
+
+# pull latest images to local directory if updates enabled
+ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && while read -r remote local; do skopeo copy docker://"$remote" oci:images/"$local"; done < images/mappings.txt;'
+
+# email if updates enabled
+ExecStartPre=-/bin/bash -c '[ ! -f no-update ] && cat info.txt | mail -s "%i updated" root'
+
+# push local images to the docker daemon
+ExecStartPre=/bin/bash -c 'while read -r remote local; do skopeo copy oci:images/"$local" containers-storage:"$local"; done < images/mappings.txt;'
+
+# start the app via docker compose
+ExecStartPre=/usr/local/bin/podman-compose --in-pod=1 up --no-start
+
+ExecStartPre=/usr/bin/podman pod start pod_%i
+
+ExecStart=/usr/local/bin/podman-compose wait
+
+ExecStop=/usr/bin/podman pod stop pod_%i
+
+[Install]
+WantedBy=multi-user.target
+
