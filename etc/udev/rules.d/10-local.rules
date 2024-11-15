@@ -1,0 +1,2 @@
+ACTION=="add", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2838", SYMLINK+="rtlsdr" 
+ACTION=="add", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="55d4", SYMLINK+="zwave"

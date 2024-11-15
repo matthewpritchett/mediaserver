@@ -215,6 +215,11 @@ function setup_backups() {
   systemctl enable --now kopia-backup@storj-vault-media-text.timer
 }
 
+function setup_udev_rules() {
+  install -m 644 -o root -g root ./etc/udev/rules.d/10-local.rules /etc/udev/rules.d
+  udevadm trigger
+}
+
 if ! [ "$(id -u)" = 0 ]; then
    echo "The script need to be run as root." >&2
    exit 1
@@ -238,6 +243,7 @@ do
       echo "Beginning Media Server Setup"
       apt update -y
       setup_cloud-init
+      setup_udev_rules
       setup_networking
       setup_avahi
       setup_fail2ban
