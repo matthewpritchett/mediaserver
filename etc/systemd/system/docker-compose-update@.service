@@ -22,7 +22,7 @@ ExecStart=/bin/bash -c 'touch no-update && chown media:media no-update && zfs sn
 ExecStart=/bin/bash -c 'while read -r remote local; do docker image pull "$remote"; docker image tag "$remote" "$local"; docker image rm "$remote"; done < images.txt;'
 
 # save the retagged images
-ExecStart=/bin/bash -c "docker image save \$(awk '{print \$2}' images.txt) | pigz --fast > images.tar.gz"
+ExecStart=/bin/bash -c 'images=$(awk "{print \$2}" images.txt); docker image save $images | pigz --fast > images.tar.gz'
 
 # email if updates enabled
 ExecStartPost=-/bin/bash -c 'cat info.txt | mail -s "%i updated" root'
