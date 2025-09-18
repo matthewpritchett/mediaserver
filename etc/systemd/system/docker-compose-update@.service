@@ -18,8 +18,11 @@ ExecStart=/bin/bash -c "echo $(date +%%T.%%N)"
 # create snapshot with updates disabled
 ExecStart=/bin/bash -c 'touch no-update && chown media:media no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
 
-# pull latest images to local directory if updates enabled
-ExecStart=/bin/bash -c 'while read -r remote local; do skopeo copy docker://"$remote" oci:images/"$local"; done < images/mappings.txt;'
+# pull latest images and retag
+ExecStart=/bin/bash -c 'while read -r remote local; do docker image pull "$remote"; docker image tag "$remote" "$local"; docker image rm "$remote"; done < images.txt;'
+
+# save the retagged images
+ExecStart=/usr/bin/docker image save $(/usr/bin/awk '{print $2}' images.txt)  | pigz --fast > images.tar.gz
 
 # email if updates enabled
 ExecStartPost=-/bin/bash -c 'cat info.txt | mail -s "%i updated" root'
