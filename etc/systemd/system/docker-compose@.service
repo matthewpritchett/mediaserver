@@ -16,7 +16,7 @@ Environment="COMPOSE_HTTP_TIMEOUT=900"
 ExecStartPre=/usr/bin/docker-compose down --remove-orphans
 
 # load local images to docker
-ExecStartPre=-/usr/bin/docker image load --input images.tar
+ExecStartPre=-/usr/bin/docker image load --input images.tar.gz
 
 # start the app via docker compose
 ExecStart=/usr/bin/docker-compose up --remove-orphans --force-recreate --no-log-prefix --renew-anon-volumes --abort-on-container-exit
