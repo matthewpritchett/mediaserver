@@ -19,10 +19,10 @@ ExecStart=/bin/bash -c "echo $(date +%%T.%%N)"
 ExecStart=/bin/bash -c 'touch no-update && chown media:media no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
 
 # pull latest images and retag
-ExecStart=/bin/bash -c 'while read -r remote local; do docker image pull "$remote"; docker image tag "$remote" "$local"; docker image rm "$remote"; done < images.txt;'
+ExecStart=/bin/bash -c 'while read -r remote local; do docker image pull "$remote" && docker image tag "$remote" "$local" && docker image rm "$remote"; done < images.txt;'
 
 # save the retagged images
-ExecStart=/bin/bash -c 'images=$(awk "{print \$2}" images.txt); docker image save $images | pigz --fast > images.tar.gz'
+ExecStart=/bin/bash -c 'docker image save $(awk "{print \\$2}" images.txt) | pigz --fast > images.tar.gz'
 
 # email if updates enabled
 ExecStartPost=-/bin/bash -c 'cat info.txt | mail -s "%i updated" root'
