@@ -175,12 +175,14 @@ function setup_docker_apps() {
         radarr
         readarr
         reverseproxy
+        rtl_433
         sabnzbd
         sonarr
         tiktok
         tinyhome
         tinystatus
         tvheadend
+        zwave
     )
 
     for APP in "${APPS[@]}"; do
