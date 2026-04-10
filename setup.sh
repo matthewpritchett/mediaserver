@@ -162,6 +162,7 @@ function setup_docker_apps() {
         calibre
         calibre-web
         dispatcharr
+        esphome
         hdhr2iptv
         home-assistant
         jellyfin
