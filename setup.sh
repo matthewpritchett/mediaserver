@@ -155,6 +155,7 @@ function setup_docker() {
 
 function setup_docker_apps() {
     docker network create --label=mediaserver mediaserver
+    docker network create --label=home-assistant home-assistant
 
     APPS=(
         calibre
