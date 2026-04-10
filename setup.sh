@@ -158,8 +158,12 @@ function setup_docker_apps() {
     docker network create --label=home-assistant home-assistant
 
     APPS=(
+        actualbudget
         calibre
         calibre-web
+        dispatcharr
+        hdhr2iptv
+        home-assistant
         jellyfin
         lidarr
         nzbhydra2
@@ -173,8 +177,10 @@ function setup_docker_apps() {
         reverseproxy
         sabnzbd
         sonarr
+        tiktok
         tinyhome
         tinystatus
+        tvheadend
     )
 
     for APP in "${APPS[@]}"; do
