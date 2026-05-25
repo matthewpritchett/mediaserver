@@ -155,7 +155,7 @@ function setup_docker() {
 
 function setup_docker_apps() {
     docker network create --label=mediaserver mediaserver
-    docker network create --label=home-assistant home-assistant
+    docker network create --driver bridge --subnet 10.117.42.0/24 --gateway 10.117.42.1 --opt com.docker.network.bridge.name=br-hass --opt com.docker.network.bridge.enable_ip_masquerade=false hass_net
 
     APPS=(
         actualbudget
