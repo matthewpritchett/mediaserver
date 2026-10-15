@@ -59,7 +59,8 @@ function setup_networking() {
   systemctl start NetworkManager
 
   # setup network config
-  install -m 644 -o root -g root ./etc/netplan/00-installer-config.yaml /etc/netplan
+  install -m 600 -o root -g root ./etc/netplan/00-installer-config.yaml /etc/netplan
+  install -m 600 -o root -g root ./etc/netplan/10-opnsense-bridges.yaml /etc/netplan
   netplan generate
   netplan apply
   echo "Finished Networking Setup"

@@ -1,0 +1,31 @@
+network:
+  version: 2
+  renderer: NetworkManager
+
+  ethernets:
+    intel_wan:
+      match:
+        macaddress: "48:df:37:8e:35:c0"
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+
+    intel_lan:
+      match:
+        macaddress: "48:df:37:8e:35:c1"
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+
+  bridges:
+    br-wan:
+      interfaces: [intel_wan]
+      dhcp4: false
+      dhcp6: false
+      link-local: []
+
+    br-lan:
+      interfaces: [intel_lan]
+      dhcp4: false
+      dhcp6: false
+      link-local: []
