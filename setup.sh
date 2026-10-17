@@ -60,6 +60,7 @@ function setup_networking() {
 
   # setup network config
   install -m 600 -o root -g root ./etc/netplan/00-installer-config.yaml /etc/netplan
+  install -m 600 -o root -g root ./etc/netplan/10-netcfg.yaml /etc/netplan
   netplan generate
   netplan apply
   echo "Finished Networking Setup"

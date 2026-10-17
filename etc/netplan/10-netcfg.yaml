@@ -1,0 +1,18 @@
+network:
+  version: 2
+  renderer: NetworkManager
+
+  ethernets:
+    eth0:
+      match:
+        macaddress: "D0:50:99:C2:B1:12"
+      dhcp4: false
+      dhcp6: false
+
+  bridges:
+    br0:
+      interfaces:
+        - eth0
+      dhcp4: true
+      dhcp6: true
+      macaddress: "C6:E8:A1:BF:9B:D4"
