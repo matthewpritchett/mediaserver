@@ -72,6 +72,11 @@ function setup_networking() {
   systemctl disable systemd-networkd
   systemctl mask systemd-networkd
 
+  # disable netword wait online
+  systemctl stop systemd-networkd-wait-online.service
+  systemctl disable systemd-networkd-wait-online.service
+  systemctl mask systemd-networkd-wait-online.service
+
   # enable network manager
   systemctl unmask NetworkManager
   systemctl enable NetworkManager
