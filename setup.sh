@@ -180,35 +180,35 @@ function setup_docker() {
 
 function setup_docker_apps() {
     docker network create --label=mediaserver mediaserver
-    docker network create --label=homeassistant homeassistant
 
     APPS=(
         actualbudget
+        authentik
         calibre
         calibre-web
         dispatcharr
         esphome
+        frigate
         hdhr2iptv
-        home-assistant
+        homeassistant
+        immich
         jellyfin
         lidarr
         nzbhydra2
         owncloud
-        photoprism
         portainer
         prowlarr
         qbittorrentvpn
         radarr
         readarr
         reverseproxy
-        rtl_433
         sabnzbd
         sonarr
         tiktok
         tinyhome
         tinystatus
         tvheadend
-        zwave
+        webtrees
     )
 
     for APP in "${APPS[@]}"; do

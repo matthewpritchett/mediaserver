@@ -21,8 +21,11 @@ ExecStart=/bin/bash -c 'touch no-update && chown media:media no-update && zfs sn
 # pull latest images and retag
 ExecStart=/bin/bash -c 'while read -r remote local; do docker image pull "$remote" && docker image tag "$remote" "$local" && docker image rm "$remote"; done < images.txt;'
 
+# build latest images
+ExecStart=/usr/bin/docker-compose build
+
 # save the retagged images
-ExecStart=/bin/bash -c 'docker image save $(awk "{print \\$2}" images.txt) | pigz --fast > images.tar.gz'
+ExecStart=/bin/bash -c 'docker image save $(docker-compose config | awk "/^[[:space:]]*image:[[:space:]]*/ {print \$2}") | pigz --fast > images.tar.gz'
 
 # email if updates enabled
 ExecStartPost=-/bin/bash -c 'cat info.txt | mail -s "%i updated" root'
