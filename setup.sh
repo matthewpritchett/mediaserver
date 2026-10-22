@@ -46,7 +46,22 @@ function setup_avahi() {
 function setup_networking() {
   echo "Beginning Networking Setup"
   #install network manager
-  DEBIAN_FRONTEND=noninteractive apt -yqq install network-manager
+  DEBIAN_FRONTEND=noninteractive apt -yqq install network-manager firewalld
+
+  # disable ufw
+  ufw disable
+  systemctl stop ufw
+  systemctl disable ufw
+  systemctl mask ufw
+  
+  # enable firewalld
+  systemctl unmask firewalld
+  systemctl enable firewalld
+  systemctl start firewalld
+
+  # allow Cockpit
+  firewall-cmd --permanent --add-service=cockpit
+  firewall-cmd --reload
 
   # disable networkd
   systemctl stop systemd-networkd

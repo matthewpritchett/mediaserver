@@ -6,6 +6,7 @@ network:
     eth0:
       match:
         macaddress: "D0:50:99:C2:B1:12"
+      set-name: eth0
       dhcp4: false
       dhcp6: false
 
