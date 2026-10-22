@@ -34,12 +34,16 @@ function setup_samba() {
   echo "SMB password is used for accessing the network shares."
   smbpasswd -a media
   service smbd restart
+  sudo firewall-cmd --permanent --add-service=samba
+  sudo firewall-cmd --reload
   echo "Finished Samba Setup"
 }
 
 function setup_avahi() {
   echo "Beginning Avahi Setup"
   DEBIAN_FRONTEND=noninteractive apt -yqq install avahi-daemon
+  sudo firewall-cmd --permanent --add-service=mdns
+  sudo firewall-cmd --reload
   echo "Finished Avahi Setup"
 }
 
