@@ -1,0 +1,10 @@
+[Unit]
+Description=update %i via podman-compose
+
+[Timer]
+OnCalendar=*-*-28 00:00:00
+Persistent=true
+RandomizedDelaySec=6h
+
+[Install]
+WantedBy=timers.target

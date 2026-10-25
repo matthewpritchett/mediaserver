@@ -22,6 +22,8 @@ function setup_media_user() {
     echo "Beginning media User Setup"
     groupadd --gid 8675309 media
     adduser --gecos "" --no-create-home --disabled-password --disabled-login --uid 8675309 --gid 8675309 media
+    usermod --add-subuids 200000-265535 media
+    usermod --add-subgids 200000-265535 media
     usermod -aG media "$real_user"
     echo "Finished media User Setup"
   fi
@@ -215,6 +217,19 @@ function setup_docker_apps() {
         systemctl enable --now docker-compose@"$APP".service
         systemctl enable --now docker-compose-update@"$APP".timer
     done
+}
+
+function setup_podman() {
+  echo "Starting Podman Setup"
+  loginctl enable-linger media
+  DEBIAN_FRONTEND=noninteractive apt -yqq install podman
+  install -m 755 -o root -g root ./usr/local/bin/zfs-prune-snapshots /usr/local/bin
+  install -m 755 -o root -g root ./usr/local/bin/podman-compose /usr/local/bin
+  install -m 644 -o root -g root ./etc/systemd/system/podman-compose@.service /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/podman-compose-update@.service /etc/systemd/system
+  install -m 644 -o root -g root ./etc/systemd/system/podman-compose-update@.timer /etc/systemd/system
+  systemctl daemon-reload
+  echo "Finished Podman Setup"
 }
 
 function setup_nut() {

@@ -1,0 +1,30 @@
+[Unit]
+Description=%i
+Requires=zfs.target
+After=zfs.target network-online.target
+
+[Service]
+Type=exec
+User=media
+Group=media
+WorkingDirectory=/vault/containers/%i
+TimeoutSec=900
+Environment="HOME=/vault/containers/%i"
+Environment="XDG_RUNTIME_DIR=/run/user/8675309"
+Environment="STORAGE_DRIVER=overlay"
+Environment="STORAGE_OPTS=overlay.mount_program=/usr/bin/fuse-overlayfs"
+Restart=on-failure
+RestartSec=5s
+
+ExecStartPre=-/usr/local/bin/podman-compose --in-pod=1 up --no-start
+
+ExecStartPre=/usr/bin/podman pod start pod_%i
+
+ExecStart=/usr/local/bin/podman-compose wait
+
+ExecStop=/usr/bin/podman pod stop pod_%i
+
+ExecStop=/bin/bash -c "echo $(date +%%T.%%N)"
+
+[Install]
+WantedBy=multi-user.target
