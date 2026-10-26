@@ -1,34 +1,33 @@
 [Unit]
-Description=update %i
+Description=update %i via podman-compose
 ConditionPathExists=!/vault/containers/%i/no-update
 Requires=zfs.target
 After=zfs.target network-online.target
 
 [Service]
 Type=oneshot
-User=media
-Group=media
+User=pritchett
+Group=pritchett
 WorkingDirectory=/vault/containers/%i
 TimeoutSec=900
-Environment="HOME=/vault/containers/%i"
-Environment="XDG_RUNTIME_DIR=/run/user/8675309"
-Environment="STORAGE_DRIVER=overlay"
-Environment="STORAGE_OPTS=overlay.mount_program=/usr/bin/fuse-overlayfs"
 
+# stop the service
 ExecStart=+/bin/systemctl stop podman-compose@%i.service
 
+# timestamp
 ExecStart=/bin/bash -c "echo $(date +%%T.%%N)"
 
-ExecStart=+/bin/bash -c 'touch no-update && chown media:media no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
+# create snapshot with updates disabled
+ExecStart=+/bin/bash -c 'touch no-update && chown pritchett:pritchett no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
 
-ExecStart=/usr/local/bin/podman-compose pull
-
+# build latest images
 ExecStart=/usr/local/bin/podman-compose build
 
-ExecStart=+/usr/local/bin/zfs-prune-snapshots -v 1y vault/containers/%i
+# save the retagged images
+ExecStart=/bin/bash -c 'podman image save $(podman-compose config | awk "/^[[:space:]]*image:[[:space:]]*/ {print \$2}") | pigz --fast > images.tar.gz'
 
-ExecStart=/usr/bin/podman image prune -f
-
+# email if updates enabled
 ExecStartPost=-/bin/bash -c 'cat info.txt | mail -s "%i updated" root'
 
+# restart the app
 ExecStopPost=+/bin/systemctl start podman-compose@%i.service

@@ -1,0 +1,13 @@
+[Unit]
+Description=podman system prune removes all unused containers (both dangling and unreferenced), pods, and volumes from local storage
+Requires=zfs.target
+Requires=podman.service
+After=zfs.target
+After=podman.service
+
+[Service]
+Type=oneshot
+User=pritchett
+Group=pritchett
+ExecStart=+/usr/local/bin/zfs-prune-snapshots -v 1y vault/containers
+ExecStart=/usr/bin/podman system prune --all --force

@@ -5,25 +5,29 @@ After=zfs.target network-online.target
 
 [Service]
 Type=exec
-User=media
-Group=media
+User=pritchett
+Group=pritchett
 WorkingDirectory=/vault/containers/%i
 TimeoutSec=900
-Environment="HOME=/vault/containers/%i"
-Environment="XDG_RUNTIME_DIR=/run/user/8675309"
-Environment="STORAGE_DRIVER=overlay"
-Environment="STORAGE_OPTS=overlay.mount_program=/usr/bin/fuse-overlayfs"
 Restart=on-failure
 RestartSec=5s
 
-ExecStartPre=-/usr/local/bin/podman-compose --in-pod=1 up --no-start
+# stop the app via podman-compose 
+ExecStartPre=/usr/local/bin/podman-compose down --remove-orphans
 
-ExecStartPre=/usr/bin/podman pod start pod_%i
+# load local images to podman
+ExecStartPre=-/usr/bin/podman image load --input images.tar.gz
 
+# start the app via podman-compose
+ExecStartPre=/usr/local/bin/podman-compose --in-pod=1 up --detach --remove-orphans --force-recreate --renew-anon-volumes --abort-on-container-failure
+
+# wait for exit
 ExecStart=/usr/local/bin/podman-compose wait
 
-ExecStop=/usr/bin/podman pod stop pod_%i
+# stop the app via podman-compose 
+ExecStop=/usr/local/bin/podman-compose down --remove-orphans
 
+# timestamp
 ExecStop=/bin/bash -c "echo $(date +%%T.%%N)"
 
 [Install]
