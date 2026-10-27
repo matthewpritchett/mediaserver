@@ -1,9 +1,0 @@
-[Unit]
-Description=podman system prune removes all unused containers (both dangling and unreferenced), pods, and volumes from local storage
-
-[Timer]
-OnCalendar=*-*-27 02:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target

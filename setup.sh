@@ -221,22 +221,6 @@ function setup_docker_apps() {
     done
 }
 
-function setup_podman() {
-  echo "Starting Podman Setup"
-  loginctl enable-linger "$real_user"
-  DEBIAN_FRONTEND=noninteractive apt -yqq install podman cockpit-podman
-  install -m 755 -o root -g root ./usr/local/bin/podman-compose /usr/local/bin
-  install -m 755 -o root -g root ./usr/local/bin/zfs-prune-snapshots /usr/local/bin
-  install -m 644 -o root -g root ./etc/systemd/system/podman-compose@.service /etc/systemd/system
-  install -m 644 -o root -g root ./etc/systemd/system/podman-compose-update@.service /etc/systemd/system
-  install -m 644 -o root -g root ./etc/systemd/system/podman-compose-update@.timer /etc/systemd/system
-  install -m 644 -o root -g root ./etc/systemd/system/podman-prune.service /etc/systemd/system
-  install -m 644 -o root -g root ./etc/systemd/system/podman-prune.timer /etc/systemd/system
-  systemctl daemon-reload
-  systemctl enable --now podman-prune.timer
-  echo "Finished Podman Setup"
-}
-
 function setup_nut() {
   DEBIAN_FRONTEND=noninteractive apt -yqq  install nut
 

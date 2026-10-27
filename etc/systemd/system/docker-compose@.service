@@ -1,9 +1,9 @@
 [Unit]
 Description=%i
-Requires=zfs.target
-After=zfs.target
-Requires=docker.service
-After=docker.service
+Requires=zfs.target docker.service
+After=zfs.target docker.service
+StartLimitIntervalSec=300s
+StartLimitBurst=5
 
 [Service]
 Type=exec
@@ -11,6 +11,8 @@ WorkingDirectory=/vault/containers/%i
 TimeoutSec=900
 Environment="DOCKER_CLIENT_TIMEOUT=900"
 Environment="COMPOSE_HTTP_TIMEOUT=900"
+Restart=on-failure
+RestartSec=5s
 
 # stop the app via docker compose 
 ExecStartPre=/usr/bin/docker-compose down --remove-orphans
