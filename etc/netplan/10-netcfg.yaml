@@ -16,4 +16,6 @@ network:
         - eth0
       dhcp4: true
       dhcp6: true
-      macaddress: "C6:E8:A1:BF:9B:D4"
+      addresses:
+        - 192.168.1.10/24
+      macaddress: "D0:50:99:C2:B1:12"
