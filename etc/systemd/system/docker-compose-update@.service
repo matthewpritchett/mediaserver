@@ -18,9 +18,6 @@ ExecStart=/bin/bash -c "echo $(date +%%T.%%N)"
 # create snapshot with updates disabled
 ExecStart=/bin/bash -c 'touch no-update && chown media:media no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
 
-# pull latest images and retag
-ExecStart=/bin/bash -c 'while read -r remote local; do docker image pull "$remote" && docker image tag "$remote" "$local" && docker image rm "$remote"; done < images.txt;'
-
 # build latest images
 ExecStart=/usr/bin/docker-compose build
 
