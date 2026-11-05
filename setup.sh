@@ -168,7 +168,7 @@ function setup_hdd_monitoring() {
 
 function setup_docker() {
   echo "Starting Docker Setup"
-  DEBIAN_FRONTEND=noninteractive apt -yqq install docker.io docker-compose
+  DEBIAN_FRONTEND=noninteractive apt -yqq install docker.io docker-compose-v2
   install -m 644 -o root -g root ./etc/systemd/system/docker-wait-zfs.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose@.service /etc/systemd/system
   install -m 644 -o root -g root ./etc/systemd/system/docker-compose-update@.service /etc/systemd/system
@@ -210,7 +210,6 @@ function setup_docker_apps() {
         sabnzbd
         sonarr
         tiktok
-        tinyhome
         tinystatus
         tvheadend
         webtrees

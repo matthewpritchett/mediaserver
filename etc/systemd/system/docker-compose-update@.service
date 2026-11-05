@@ -19,10 +19,10 @@ ExecStart=/bin/bash -c "echo $(date +%%T.%%N)"
 ExecStart=/bin/bash -c 'touch no-update && chown media:media no-update && zfs snapshot -r vault/containers/%i@$(date +%%Y-%%m-%%d-%%H%%M%%S) && rm no-update'
 
 # build latest images
-ExecStart=/usr/bin/docker-compose build
+ExecStart=/usr/bin/docker compose build
 
 # save the retagged images
-ExecStart=/bin/bash -c 'docker image save $(docker-compose config | awk "/^[[:space:]]*image:[[:space:]]*/ {print \$2}") | pigz --fast > images.tar.gz'
+ExecStart=/bin/bash -c 'docker image save $(docker compose config --images) | pigz --fast > images.tar.gz'
 
 # email if updates enabled
 ExecStartPost=-/bin/bash -c 'cat info.txt | mail -s "%i updated" root'

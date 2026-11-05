@@ -15,16 +15,16 @@ Restart=on-failure
 RestartSec=5s
 
 # stop the app via docker compose 
-ExecStartPre=/usr/bin/docker-compose down --remove-orphans
+ExecStartPre=/usr/bin/docker compose down --remove-orphans
 
 # load local images to docker
 ExecStartPre=-/usr/bin/docker image load --input images.tar.gz
 
 # start the app via docker compose
-ExecStart=/usr/bin/docker-compose up --remove-orphans --force-recreate --no-log-prefix --renew-anon-volumes --abort-on-container-exit
+ExecStart=/usr/bin/docker compose up --remove-orphans --force-recreate --no-log-prefix --renew-anon-volumes --abort-on-container-exit
 
 # stop the app via docker compose 
-ExecStop=/usr/bin/docker-compose down --remove-orphans
+ExecStop=/usr/bin/docker compose down --remove-orphans
 
 ExecStop=/bin/bash -c "echo $(date +%%T.%%N)"
 
