@@ -191,7 +191,6 @@ function setup_docker_apps() {
         authentik
         calibre
         calibre-web
-        dispatcharr
         esphome
         frigate
         hdhr2iptv
