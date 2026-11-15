@@ -184,14 +184,13 @@ function setup_docker() {
 
 function setup_docker_apps() {
     docker network create --label=mediaserver mediaserver
-    docker network create --label=mediaserver --driver macvlan --subnet=192.168.1.0/24 --gateway=192.168.1.1 --opt parent=br0 macvlan_br0
+    docker network create --label=mediaserver --driver macvlan --subnet=192.168.1.0/24 --gateway=192.168.1.1 --ipv6 --subnet=fd42:a7b1:c9e0:1::/64 --gateway=fd42:a7b1:c9e0:1::1 --opt parent=br0 macvlan_br0
 
     APPS=(
         actualbudget
         authentik
         calibre
         calibre-web
-        esphome
         frigate
         hdhr2iptv
         homeassistant
